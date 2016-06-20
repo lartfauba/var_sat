@@ -2,4 +2,6 @@
 
 ## TODO
 
-* Agregar buen soporte de logging.
+* Pulir un poco los niveles de logueo.
+* Consultar las imagenes del inventario una sola vez (después de cada actualización)
+* Detectar automáticamente la proyección de las imagenes
