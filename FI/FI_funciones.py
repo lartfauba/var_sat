@@ -1,5 +1,14 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
+
+########################################################################
+#
+# Filtrador/Intepolador
+#
+# author:Gonzalo Garcia Accinelli https://github.com/gonzalogacc
+#
+########################################################################
+
 
 import psycopg2 as pg
 from psycopg2.extras import DictCursor
@@ -10,24 +19,24 @@ import numpy as np
 def conexionBaseDatos(database, user, password, host):
 	"""
 	Se conecta a la base de datos y devuelve un cursor que es que se va a usar para operar con la base de datos
-	
+
 	Argumentos
 	-------------
-	
+
 	Devuelve
 	------------
 	"""
-	
+
 	conn = pg.connect(database=database, user=user, password=password, host=host)
 	cursor = conn.cursor(cursor_factory=DictCursor)
-	
+
 	return conn, cursor
 
 
 def seriesInterpolar (cursor, esquema, tabla, c_pixel, c_qflag):
     """
 	Dada una tabla genera una lista de id_pixels que necesitan interpolacion (sin repetir)
-	
+
 	Argumentos
 	------------
     cursor: Cursor con el que se van a realizar las consultas
@@ -45,7 +54,8 @@ def seriesInterpolar (cursor, esquema, tabla, c_pixel, c_qflag):
     cursor.execute(sql)
     pixels_a_interpolar = cursor.fetchall()
     return pixels_a_interpolar
-	
+
+
 def interpoladorSerie (conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_serie):
     """
     Dado un id de pixel genera las interpolaciones necesarias para completar la serie de datos
@@ -79,12 +89,12 @@ def interpoladorSerie (conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_ser
 
         for dia in dias:
             try:
-                interpolado = f(dia[0]) 
+                interpolado = f(dia[0])
                 #print dias, dia[0], id_serie, interpolado
             except:
                 interpolado = -9999
 
-		
+
 
 	    sql = """	UPDATE {0}.{1}
 			SET {2} = {3}
@@ -97,7 +107,7 @@ def interpoladorSerie (conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_ser
     	    except Exception, e:
 		print sql
 		print e.pgerror
-		
+
             #conn.commit()
 
 def filtradoIndice (cursor, esquema, tabla, c_afiltrar, c_calidad):

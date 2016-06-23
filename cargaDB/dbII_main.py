@@ -10,12 +10,6 @@
 ########################################################################
 ########################################################################
 
-# IMPORTANTE: ejecutar:
-
-# python dbImageImport_...py > nombre_archivo_de_texto.lon
-# TODO: Agregar handler de logs
-# ... para guardar alertas y mensajes de error en el archivo nombre_archivo_de_texto.log
-
 import dbII_funciones
 from utiles import *
 
@@ -37,11 +31,12 @@ parser.add_argument("--producto", required=True)
 parser.add_argument("--version", default="005")
 parser.add_argument("--tile", required=True)
 parser.add_argument("--subdatasets", required=True, type=json.loads)
-parser.add_argument("--srid", default="7008") # MODIS CMG (latlon Clarke66)
+parser.add_argument("--srid", default="96842")
 # TODO: No se puede detectar la proyeccion de la imagen? Seguro que si
 
 # Parmetros del script
 parser.add_argument("--workers", type=int, default=4)
+parser.add_argument("--logfile", default="/tmp/cargaDB.log") #
 
 args = parser.parse_args()
 

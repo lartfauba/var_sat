@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
+########################################################################
+#
+# Filtrador/Intepolador
+#
+# author:Gonzalo Garcia Accinelli https://github.com/gonzalogacc
+#
+########################################################################
+
 from FI_funciones import *
 from argparse import ArgumentParser                                              
                                                                                  

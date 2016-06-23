@@ -31,9 +31,10 @@ from os import walk  # para buscarimagenes
 
 from utiles import obtenerLogger
 
-logger = obtenerLogger('/tmp/var_sat.log')
+
 
 args = None
+logger = obtenerLogger(args.logfile)
 
 def conexionBaseDatos(database, user, password, host):
     """
@@ -198,6 +199,11 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
     conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
     tabla = subdataset_tabla[sds]
 
+    # FIXME esto es un fix horrible por el path a las imagenes.
+    # hay que ver si se puede sacar y usar siempre rutas absolutas
+    i = imagen.split(':')
+    imgDS = ":".join([ i[0], i[1], "%s/%s" % (path, i[2]), i[3], i[4] ]) ]
+
     try:
         print "Creando un archivo temporal"
         temporal = NamedTemporaryFile(dir='/tmp')
@@ -207,7 +213,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
 
     try:
         raster2pgsql = "/usr/bin/raster2pgsql"
-        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, path_imagen, tabla]
+        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, imgDS, tabla]
         Popen(comando,stdout=temporal).wait()
     except Exception as e:
         print "\nFallo el comando raster2pgsql: %s" % e
@@ -219,7 +225,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
             cursor.execute(temporal.read()) #ejecuto el script
             sql = """
                 INSERT INTO rasters.inventario (imagen, fecha, tabla_destino)
-                VALUES (%s, %s, %s)
+                VALUES ('%s','%s', '%s')
                 """ % (path_imagen, datetime.now(), tabla)
             cursor.execute(sql) #actualizo el inventario de imagenes
 
