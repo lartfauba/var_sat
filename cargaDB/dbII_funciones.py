@@ -31,8 +31,6 @@ from os import walk  # para buscarimagenes
 
 from utiles import obtenerLogger
 
-
-
 args = None
 logger = obtenerLogger(args.logfile)
 
@@ -180,7 +178,7 @@ def _chequearInventario(lista_argumentos):
 
     return
 
-def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
+def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=args.dryrun):
     """
     Dado el path a una imagen la importa en la base de datos en la tabla correspondiente
 
@@ -205,10 +203,10 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
     imgDS = ":".join([ i[0], i[1], "%s/%s" % (path, i[2]), i[3], i[4] ]) ]
 
     try:
-        print "Creando un archivo temporal"
+        # print "Creando un archivo temporal"
         temporal = NamedTemporaryFile(dir='/tmp')
     except Exception as e:
-        print "Error creando el archivo temporal: %s", e
+        logger.error("Error creando el archivo temporal: %s" % e)
         return 0
 
     try:
@@ -216,7 +214,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
         comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, imgDS, tabla]
         Popen(comando,stdout=temporal).wait()
     except Exception as e:
-        print "\nFallo el comando raster2pgsql: %s" % e
+        logger.error("Fallo el comando raster2pgsql: %s" % e)
         return 0
 
     try:
@@ -230,7 +228,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=True):
             cursor.execute(sql) #actualizo el inventario de imagenes
 
     except Exception as e:
-        print "\nFallo ejecutar el script temporal: %s", e
+        logger.error("Fallo ejecutar el script temporal: %s" % e)
 
         if not dryrun:
             conexion.rollback()
@@ -264,6 +262,8 @@ def selectorTabla(nombre_imagen, tablas):
     nombre_tabla: nombre de la tabla donde debe ubicarse la imagen
 
     """
+    # TODO hay terminar de implementar esto para poder usar solo el dataset en
+    # el argumento en lugar del dict con el dataset y la tabla destino
     #tablas = {'NDVI_MOD13Q1': 'mod13q1_ndvi', 'EVI_MOD13Q1': 'mod13q1_evi', 'QA_MOD13Q1': 'mod13q1_qa'}
     return tablas[os.path.split(nombre_imagen)[1].split('.')[0]]
 
@@ -293,7 +293,7 @@ def verDatasets(archivo):
         print "%s\t%s" % (key, value.replace(archivo,''))
 
 
-def executeUpdates (conexion, cursor, tablas):
+def executeUpdates(tablas):
     """
     Ejecuta los updates de las columnas de fecha y geometria, actualiza los indices
 
@@ -306,6 +306,8 @@ def executeUpdates (conexion, cursor, tablas):
     ---------
     None
     """
+    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+
     sql_geom = """
     UPDATE {0}
     SET the_geom = st_setsrid(cuad.poligono, {1})
@@ -333,14 +335,25 @@ def executeUpdates (conexion, cursor, tablas):
     WHERE fecha ISNULL """
 
     for tabla in tablas:
-        ## actualizar geometrias
-        cursor.execute(sql_geom.format(tabla, srid))
+        try:
+            logger.info("Actualizando la columna de geometrías de %s (%s)" % tabla)
+            cursor.execute(sql_geom.format(tabla, srid))
+        except Exception as e:
+            logger.error("Error al actualizar la columna de geometrías: %s" % e)
+            logger.debug("SQL: %s" % sql_geom.format(tabla,srid))
+            continue
 
-        ## actualizar fechas
-        cursor.execute(sql_fechas.format(tabla))
+        try:
+            logger.info("Actualizando la de fechas de %s (%s)" % (tabla, srid))
+            cursor.execute(sql_fechas.format(tabla))
+        except Exception as e:
+            logger.error("Fallo ejecutar el script temporal: %s" % e)
+            logger.debug("SQL: %s" % sql_fehas.format(tabla)))
+            continue
+
         conexion.commit()
 
-        return None
+    return None
 
 
 def chequearInventario(imagenes, subdatasets, workers=1):

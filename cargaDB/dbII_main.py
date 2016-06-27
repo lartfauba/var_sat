@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 ########################################################################
 ##
 ## Gestion de carga de imagenes a la base de datos
@@ -7,7 +8,6 @@
 ## author:Gonzalo Garcia Accinelli https://github.com/gonzalogacc
 ## author:José Clavijo https://github.com/joseclavij/
 ## author:David Vinazza https://github.com/dvinazza/
-########################################################################
 ########################################################################
 
 import dbII_funciones
@@ -37,6 +37,7 @@ parser.add_argument("--srid", default="96842")
 # Parmetros del script
 parser.add_argument("--workers", type=int, default=4)
 parser.add_argument("--logfile", default="/tmp/cargaDB.log") #
+parser.add_argument("--dryrun", default=False, action='store_true')
 
 args = parser.parse_args()
 
@@ -52,10 +53,14 @@ imagenes = dbII_funciones.buscarImagenes(args.ruta, args.satelite, args.producto
 
 #print dbII_funciones.listarInventario()
 #print lista_imagenes
-## Chequear inventario -> cargar imagenes nuevas
+
+# Carga las imagenes nuevas, también actualiza el inventario
 dbII_funciones.chequearInventario(imagenes, args.subdatasets, workers=args.workers)
 
-## TODO: Ver si conviene paralelizar tambien el executeUpdates()
+# Actualiza las columnas de geometria y fecha de las tablas destino
+dbII_funciones.executeUpdates(args.subdatasets.values())
+
+# TODO: Ver si conviene paralelizar tambien el executeUpdates()
 
 """
 ## actualizar columnas de fechas y de indices luego de la carga de datos
