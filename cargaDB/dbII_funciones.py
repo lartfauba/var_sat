@@ -32,7 +32,7 @@ from os import walk  # para buscarimagenes
 from utiles import obtenerLogger
 
 args = None
-logger = obtenerLogger(args.logfile)
+logger = None
 
 def conexionBaseDatos(database, user, password, host):
     """
@@ -115,7 +115,8 @@ def listarInventario():
         SELECT imagen FROM rasters.inventario
         WHERE imagen like '%{0}%'
         AND imagen like '%{1}%'
-    """.format(args.producto, args.tile)
+        AND imagen like '%.{2}.%'
+    """.format(args.producto, args.tile, args.version)
     cursor.execute(sql)
     imagenes_inventario = cursor.fetchall()
 
@@ -125,7 +126,7 @@ def listarInventario():
     except:
         imagenes_inventario = []
 
-    logger.info("Encontre %d imagenes de %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile))
+    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
     return imagenes_inventario
 
 
@@ -293,19 +294,18 @@ def verDatasets(archivo):
         print "%s\t%s" % (key, value.replace(archivo,''))
 
 
-def executeUpdates(tablas):
+def executeUpdates(tablas,srid):
     """
     Ejecuta los updates de las columnas de fecha y geometria, actualiza los indices
 
     Argumentos
     ----------
-    conexion:
-    cursor:
 
     Devuelve
     ---------
     None
     """
+    # TODO deducir el srid mediante postgres
     conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
 
     sql_geom = """
@@ -336,7 +336,7 @@ def executeUpdates(tablas):
 
     for tabla in tablas:
         try:
-            logger.info("Actualizando la columna de geometrías de %s (%s)" % tabla)
+            logger.info("Actualizando la columna de geometrias de %s (%s)" % (tabla,srid))
             cursor.execute(sql_geom.format(tabla, srid))
         except Exception as e:
             logger.error("Error al actualizar la columna de geometrías: %s" % e)
@@ -347,8 +347,8 @@ def executeUpdates(tablas):
             logger.info("Actualizando la de fechas de %s (%s)" % (tabla, srid))
             cursor.execute(sql_fechas.format(tabla))
         except Exception as e:
-            logger.error("Fallo ejecutar el script temporal: %s" % e)
-            logger.debug("SQL: %s" % sql_fehas.format(tabla)))
+            logger.error("Error al actualizar la columna de fechas: %s" % e)
+            logger.debug("SQL: %s" % sql_fechas.format(tabla))
             continue
 
         conexion.commit()

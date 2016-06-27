@@ -43,6 +43,7 @@ args = parser.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
 dbII_funciones.args = args
+dbII_funciones.logger = obtenerLogger(args.logfile,args.srid)
 
 ## listar imagenes
 #lista_imagenes = []
