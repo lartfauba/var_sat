@@ -43,7 +43,7 @@ args = parser.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
 dbII_funciones.args = args
-dbII_funciones.logger = obtenerLogger(args.logfile,args.srid)
+dbII_funciones.logger = obtenerLogger(args.logfile)
 
 ## listar imagenes
 #lista_imagenes = []
@@ -59,7 +59,7 @@ imagenes = dbII_funciones.buscarImagenes(args.ruta, args.satelite, args.producto
 dbII_funciones.chequearInventario(imagenes, args.subdatasets, workers=args.workers)
 
 # Actualiza las columnas de geometria y fecha de las tablas destino
-dbII_funciones.executeUpdates(args.subdatasets.values())
+dbII_funciones.executeUpdates(args.subdatasets.values(),args.srid)
 
 # TODO: Ver si conviene paralelizar tambien el executeUpdates()
 

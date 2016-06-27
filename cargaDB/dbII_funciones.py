@@ -179,7 +179,7 @@ def _chequearInventario(lista_argumentos):
 
     return
 
-def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=args.dryrun):
+def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=None):
     """
     Dado el path a una imagen la importa en la base de datos en la tabla correspondiente
 
@@ -194,6 +194,10 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=args.dryrun):
         0 = Error
         1 = Ok
     """
+    if dryrun is None:
+	dryrun = args.dryrun
+
+
     # conexion, cursor = conexionDatabase()
     conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
     tabla = subdataset_tabla[sds]
@@ -201,7 +205,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=args.dryrun):
     # FIXME esto es un fix horrible por el path a las imagenes.
     # hay que ver si se puede sacar y usar siempre rutas absolutas
     i = imagen.split(':')
-    imgDS = ":".join([ i[0], i[1], "%s/%s" % (path, i[2]), i[3], i[4] ]) ]
+    imgDS = ":".join([ i[0], i[1], "%s/%s" % (path, i[2]), i[3], i[4] ])
 
     try:
         # print "Creando un archivo temporal"
