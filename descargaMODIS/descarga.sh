@@ -14,6 +14,8 @@ tmp=$(mktemp --suffix=`basename $0`)
 fecha=$(date +%Y%m%d)
 wget_log="$log_dir/logs/wget.$1.$fecha"
 
+# Chequeos
+
 if [ $# -ne 1 ]; then
     echo "Debe proveer un archivo de configuración de descarga como argumento"
     exit
@@ -24,7 +26,18 @@ if [ ! -f $1 ]; then
     exit
 fi
 
-exit
+if [ ! -d $directorio ]; then
+	echo "Creando directorio para descargas: $directorio"
+	mkdir -p $directorio
+fi
+
+if [ ! -d $log_dir ]; then
+	echo "Creando directorio para logs: $log_dir"
+	mkdir -p $log_dir
+fi
+
+
+# Programa en si
 
 nro=0
 while IFS='' read -r line || [[ -n "$line" ]]; do
