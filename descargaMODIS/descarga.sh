@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Variables de Configuracion
-
 conf_file=configuracion.sh
 if [ ! -f $conf_file ]; then
 	echo "Debe crear el archivo $conf_file con la configuracion necesaria para este script."

@@ -3,10 +3,11 @@
 ## TODO
 
 * Documentar inline los parametros internos del script
-* Agregar cuenta de las imagenes prexistentes
+
+## Instalación
 
 
-## Crear una configuración para el script en general
+### Crear una configuración para el script en general
 
 Para configurar el directorio de descarga, la verbosidad de la aplicacion de descarga y el directorio para los logs, renombrrrrrrrrrrar el archivo ejemplo.configuracion.sh a configuracion.sh y editar de forma acorde.
 
@@ -15,7 +16,7 @@ El script de descarga.sh carga estas variables al iniciar.
 Ver "ejemplo.configuracion.sh"
 
 
-## Crear una configuracion de descarga de determinadas imágenes
+### Crear una configuracion de descarga de determinadas imágenes
 
 Para crear una configuracion de descarga que el script tome como parametro, crear un archivo de texto con el siguiente formato:
 
@@ -31,7 +32,10 @@ MOLT MOD13Q1.005 h13v12,h12v12,h13v13,h12v13,h12v11,h14v14,h11v11,h11v12,h11v10,
 
 Ver "ejemplo.imagenes"
 
-Luego, ejecutar el script descarga.sh con el archivo generado como primer y unico parámetro.
+
+## Utilización
+
+Ejecutar el script descarga.sh con el archivo de configuración de descarga deseado como primer y unico parámetro.
 
 Ejemplo:
 ```
@@ -39,7 +43,12 @@ Ejemplo:
 ```
 
 
-## Configurar el Crontab
+## Contabilizar imagenes ya descargadas
+
+Utilizar el script cuenta.sh para contar las imagenes ya descargadas.
+
+
+## Configurar descargas automáticas en linux
 
 La búsqueda/descarga se automatiza facilmente mediante el crontab.
 
