@@ -12,7 +12,7 @@ source $conf_file
 servidor=e4ftl01.cr.usgs.gov
 tmp=$(mktemp --suffix=`basename $0`)
 fecha=$(date +%Y%m%d)
-wget_log="$log_dir/logs/wget.$1.$fecha"
+wget_log="$log_dir/wget.$1.$fecha"
 
 # Chequeos
 
