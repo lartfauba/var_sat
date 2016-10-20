@@ -126,7 +126,7 @@ def listarInventario():
     except:
         imagenes_inventario = []
 
-    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
+    logger.info("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
     return imagenes_inventario
 
 
@@ -171,7 +171,7 @@ def _chequearInventario(lista_argumentos):
             logger.info('%s: no esta cargada y se va a cargar' %(subdatasets[key]))
 
             if importarImagen(subdatasets[key], subdataset_tabla, key) != 0:
-                logger.info('%s: se cargo correctamente' %(subdatasets[key]))
+                logger.warn('%s: se cargo correctamente' %(subdatasets[key]))
             else:
                 logger.error('%s: no se cargo' %(subdatasets[key]))
     except Exception as e:
@@ -365,9 +365,9 @@ def chequearInventario(imagenes, subdatasets, workers=1):
     argumentos=[(i, subdatasets) for i in imagenes]
 
     # PROCESAMIENTO EN PARALELO
-    logger.info("Iniciando Pool")
+    logger.debug("Iniciando Pool")
     cola = multiprocessing.Pool(processes=workers)
-    logger.info("Cargando tareas")
+    logger.debug("Cargando tareas")
     cola.map_async(_chequearInventario, argumentos)
     #cola.map_async(fPrueba, argumentos)
     cola.close()
