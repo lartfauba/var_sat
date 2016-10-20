@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from logging import getLogger, Formatter, FileHandler, StreamHandler
 from logging import INFO, DEBUG, ERROR, WARN
