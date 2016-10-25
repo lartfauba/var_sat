@@ -33,3 +33,5 @@ pip install gdal psycopg2 numpy # Instalamos las librerias necesarias
 ## Utilización 
 
 source venv/bin/activate 
+
+./dbII_main.py --satelite MOLT --producto MOD13Q1 --version 006 --subdatasets '{"SUBDATASET_1_NAME":"rasters.mod13q1_006_ndvi","SUBDATASET_2_NAME":"rasters.mod13q1_006_evi", "SUBDATASET_3_NAME":"rasters.mod13q1_006_qa"}' --tile h13v12

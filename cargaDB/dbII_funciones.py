@@ -126,7 +126,7 @@ def listarInventario():
     except:
         imagenes_inventario = []
 
-    logger.info("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
+    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
     return imagenes_inventario
 
 
@@ -170,24 +170,24 @@ def _chequearInventario(lista_argumentos):
 
             logger.info('%s: no esta cargada y se va a cargar' %(subdatasets[key]))
 
-            if importarImagen(subdatasets[key], subdataset_tabla, key) != 0:
+            if importarImagen(base_path, subdatasets[key], subdataset_tabla[key]) != 0:
                 logger.warn('%s: se cargo correctamente' %(subdatasets[key]))
             else:
                 logger.error('%s: no se cargo' %(subdatasets[key]))
     except Exception as e:
-        print "Error: %s", e
+        logger.error("Error: %s", e)
 
     return
 
-def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=None):
+def importarImagen(base_path, dataset, tabla, dryrun=None):
     """
     Dado el path a una imagen la importa en la base de datos en la tabla correspondiente
 
     Argumentos
     -----------
-    path_imagen: path a la imagen que se quiere cargar en la base de datos
-    flags: flags que se le van a pasar a la funcion para activar sus opciones, \
-            tienen que ser en la forma '-a -F', aca se pone el srid, el tamanio de bloque etc
+    base_path:	path a la imagen que se quiere cargar en la base de datos
+    dataset:		dataset a cargar
+    tabla:		tabla destino de la carga
 
     Devuelve
     ----------
@@ -200,15 +200,8 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=None):
 
     # conexion, cursor = conexionDatabase()
     conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
-    tabla = subdataset_tabla[sds]
-
-    # FIXME esto es un fix horrible por el path a las imagenes.
-    # hay que ver si se puede sacar y usar siempre rutas absolutas
-    i = imagen.split(':')
-    imgDS = ":".join([ i[0], i[1], "%s/%s" % (path, i[2]), i[3], i[4] ])
-
+	
     try:
-        # print "Creando un archivo temporal"
         temporal = NamedTemporaryFile(dir='/tmp')
     except Exception as e:
         logger.error("Error creando el archivo temporal: %s" % e)
@@ -216,8 +209,8 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=None):
 
     try:
         raster2pgsql = "/usr/bin/raster2pgsql"
-        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, imgDS, tabla]
-        Popen(comando,stdout=temporal).wait()
+        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, dataset, tabla]
+        Popen(comando,cwd=base_path,stdout=temporal).wait()
     except Exception as e:
         logger.error("Fallo el comando raster2pgsql: %s" % e)
         return 0
@@ -229,7 +222,7 @@ def importarImagen(path_imagen, subdataset_tabla, sds, dryrun=None):
             sql = """
                 INSERT INTO rasters.inventario (imagen, fecha, tabla_destino)
                 VALUES ('%s','%s', '%s')
-                """ % (path_imagen, datetime.now(), tabla)
+                """ % (dataset, datetime.now(), tabla)
             cursor.execute(sql) #actualizo el inventario de imagenes
 
     except Exception as e:
