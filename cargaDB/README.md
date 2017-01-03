@@ -2,9 +2,11 @@
 
 ## TODO
 
+* Permitir la carga por tile, tiles o todos.
 * Consultar las imagenes del inventario una sola vez (después de cada actualización)
 * Permitir cargar varios tiles a la vez
 * Detectar automáticamente la proyección de las imagenes
+* Desarrollar cuan especifica tiene que ser la ruta a las imagenes
 
 ## Instalación
 

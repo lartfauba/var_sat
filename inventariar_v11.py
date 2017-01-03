@@ -213,7 +213,7 @@ if __name__ == '__main__':
 	#~ """
 	### Ver escenas MODIS distintas por tile y por anyo:
 
-	#print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13q1_qa')
+	print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13q1_qa')
 	#print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13q1_evi')
 	#print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13q1_ndvi')
 
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 	#~ print modis_registros_por_tile_anyo(tabla_raster='rasters.mod11c2_lstd')
 	#~ print modis_registros_por_tile_anyo(tabla_raster='rasters.mod11c2_lstn')
 
-	print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13c1_ndvi')
+	#print modis_registros_por_tile_anyo(tabla_raster='rasters.mod13c1_ndvi')
 
 	#~ """
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 	###		de una escena (distintas fechas de procesamiento NASA):
 
 	# MOD13Q1
-	#print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13q1_qa')
+	print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13q1_qa')
 	#print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13q1_evi')
 	#print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13q1_ndvi')
 
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 	#~ print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod11c2_lstn')
 
 	# MOD13C1
-	print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13c1_ndvi')
+	#print modis_escenas_por_fecha_tile(tabla_raster='rasters.mod13c1_ndvi')
 
 
 	#"""

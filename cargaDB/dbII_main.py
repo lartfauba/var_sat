@@ -37,7 +37,7 @@ parser.add_argument("--satelite", required=True)
 parser.add_argument("--producto", required=True)
 parser.add_argument("--version", default="005",
 			help='Versión de las imágenes.')
-parser.add_argument("--tile", required=True)
+parser.add_argument("--tile", required=True)  # TODO: Soportar listas, o si no se especifica, cargar todos los tiles que se encuentren
 parser.add_argument("--subdatasets", required=True, type=json.loads,
 			help='Array de JSON donde cada key es un dataset y su valor la tabla destino')
 parser.add_argument("--srid", default="96842",
