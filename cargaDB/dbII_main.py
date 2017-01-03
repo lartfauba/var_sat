@@ -55,6 +55,8 @@ imagenes = dbII_funciones.buscarImagenes(args.ruta, args.satelite, args.producto
 #print dbII_funciones.listarInventario()
 #print lista_imagenes
 
+dbII_funciones.chequearTablas(args.subdatasets.values())
+
 # Carga las imagenes nuevas, también actualiza el inventario
 dbII_funciones.chequearInventario(imagenes, args.subdatasets, workers=args.workers)
 
@@ -62,6 +64,7 @@ dbII_funciones.chequearInventario(imagenes, args.subdatasets, workers=args.worke
 dbII_funciones.executeUpdates(args.subdatasets.values(),args.srid)
 
 # TODO: Ver si conviene paralelizar tambien el executeUpdates()
+dbII_funciones.limpiaDuplicadas()
 
 """
 ## actualizar columnas de fechas y de indices luego de la carga de datos
