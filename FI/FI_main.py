@@ -13,10 +13,10 @@ from FI_funciones import *
 from argparse import ArgumentParser                                              
                                                                                  
 parser = ArgumentParser()                                                        
-parser.add_argument("--usuario", default='fenoteca')                             
-parser.add_argument("--clave", default='Direna2016')
+parser.add_argument("--usuario", default='postgres')                             
+parser.add_argument("--clave", default='postgres')
 parser.add_argument("--servidor", default='localhost')                           
-parser.add_argument("--base", default='fenoteca')                                     
+parser.add_argument("--base", default='var_sat_new')                                     
 parser.add_argument("--esquema", required=True)                                     
 parser.add_argument("--tabla", required=True)                                    
 parser.add_argument("--c_pixel", default='id_pixel')                             

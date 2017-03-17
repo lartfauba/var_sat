@@ -3,7 +3,9 @@
 
 ## TODO
 
-* Documentar el uso 
+* Documentar el uso
+* Incluir la variable de base de datos en el script de plsh
+* Utilizar un archivo de configuración para el usuario/clave del script de python
 
 ## Instalación del script de Filtrado/Interpolado
 
