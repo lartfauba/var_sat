@@ -40,7 +40,7 @@ for e in $(echo $escenas | sed 's/,/ /g'); do
 done
 echo
 
-for i in {00..16}; do
+for i in {00..$(date +%y)}; do  # Valido hasta el 2099
 	echo -e "20$i$s\c"
 	for e in $(echo $escenas | sed 's/,/ /g'); do
 	    echo -e "$(cat $tmp | grep A20$i | grep $e | wc -l)$s\c"
