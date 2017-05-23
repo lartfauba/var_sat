@@ -35,11 +35,17 @@ sudo pip install virtualenv
 ### Instalacion propiamente dicha
 
 ```bash
-virtualenv venv # Creamos el environment virtual 
-pip install gdal psycopg2 numpy # Instalamos las librerias necesarias 
+virtualenv venv  # Creamos el environment virtual
+source venv/bin/activate  # Entramos al environment
+pip install gdal psycopg2 numpy ipython  # Instalamos las librerias necesarias 
 ```
 
 ## Utilización 
+
+```bash
+source venv/bin/activate # Entramos al environment
+./dbII_main.py [ARGUMENTOS] # Ejecutamos el script
+```
 
 ### Parámetros
 
