@@ -35,16 +35,18 @@ sudo pip install virtualenv
 ### Instalacion propiamente dicha
 
 ```bash
-virtualenv venv  # Creamos el environment virtual
-source venv/bin/activate  # Entramos al environment
+mkdir ~/venvs  # Creo un directorio donde guardar los environments
+virtualenv ~/venvs/var_sat  # Creamos el environment virtual particular para esto
+source ~/venvs/var_sat/bin/activate  # Entramos al environment
 pip install gdal psycopg2 numpy ipython  # Instalamos las librerias necesarias 
 ```
 
 ## Utilización 
 
 ```bash
-source venv/bin/activate # Entramos al environment
-./dbII_main.py [ARGUMENTOS] # Ejecutamos el script
+source ~/venvs/var_sat/bin/activate  # Entramos al environment
+cd var_sat/cargaDB  # Vamos al directorio del script
+./dbII_main.py [PARAMETROS]  # Lo ejecutamos con los argumentos precisos
 ```
 
 ### Parámetros
