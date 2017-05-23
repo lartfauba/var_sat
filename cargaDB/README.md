@@ -59,7 +59,7 @@ Ejemplo:
 ./dbII_main.py \
 --base var_sat_new \
 --ruta /imagenes/e4ftl01.cr.usgs.gov \
---satelite MOLT --producto MOD13Q1 --version 006 --tile h13v12
+--satelite MOLT --producto MOD13Q1 --version 006 --tile h13v12 \
 --subdatasets '{"SUBDATASET_1_NAME":"rasters.mod13q1_006_ndvi","SUBDATASET_2_NAME":"rasters.mod13q1_006_evi", "SUBDATASET_3_NAME":"rasters.mod13q1_006_qa"}'
 ```
 Nota: Por cuestiones de python, no es posible cortar la linea de los datasets.
