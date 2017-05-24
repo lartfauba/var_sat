@@ -15,7 +15,7 @@ import FI_funciones
 from argparse import ArgumentParser
 import utiles
 
-from sys import exit
+# from sys import exit
 
 parser = ArgumentParser()
 parser.add_argument("--usuario", default='postgres')
@@ -31,9 +31,9 @@ parser.add_argument("--c_afiltrar", required=True)
 args = parser.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
-FI_funciones.logger = utiles.obtenerLogger('/tmp/FI.log')
+logger = utiles.obtenerLogger('/tmp/FI.log')
+FI_funciones.logger = logger
 
-exit()
 
 cont = 0
 conn, cur = FI_funciones.conexionBaseDatos(
@@ -44,7 +44,8 @@ c_filtrado, c_qflag = FI_funciones.filtradoIndice(
     cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
 conn.commit()
 
-pixeles = seriesInterpolar(cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
+pixeles = FI_funciones.seriesInterpolar(
+    cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
 for pixel in pixeles:
     # Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
