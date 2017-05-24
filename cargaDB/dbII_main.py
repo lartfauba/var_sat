@@ -47,7 +47,7 @@ parser.add_argument("--srid", default="96842",
 # Parmetros del script
 parser.add_argument("--workers", type=int, default=cpu_count(),
 			help='Número de hilos para realizar la carga de las imágenes. Por defecto es el número de procesadores disponibles.')
-parser.add_argument("--logfile", default="/tmp/cargaDB.log",
+parser.add_argument("--logfile", default="/tmp/cargaDB-%s.log" % obtenerUsuario(),
 			help='Archivo donde escribir los logs.') #
 parser.add_argument("--dryrun", default=False, action='store_true',
 			help='Ejecutar todas las operaciones excepto la carga misma.')

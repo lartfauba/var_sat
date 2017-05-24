@@ -3,7 +3,8 @@
 from logging import getLogger, Formatter, FileHandler, StreamHandler
 from logging import INFO, DEBUG, ERROR, WARN
 
-from os import makedirs, remove
+from os import makedirs, remove, getuid
+from pwd import getpwuid
 import errno
 
 
@@ -21,6 +22,8 @@ def verificarDirectorio(path):
         if exception.errno != errno.EEXIST:
             raise
 
+def obtenerUsuario():
+        return getpwuid(getuid())[0]
 
 def obtenerLogger(output):
     logger = getLogger('var_sat')
