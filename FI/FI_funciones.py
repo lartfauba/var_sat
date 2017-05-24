@@ -54,7 +54,7 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     interpolar
     """
 
-    sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3} = 'malo'".format(
+    sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
         c_pixel, esquema, tabla, c_qflag)
     # cursor.execute("select distinct "+columna_pixel+" from "+tabla+" where "+columna_flag_calidad+" = 'malo';")
     cursor.execute(sql)
@@ -128,7 +128,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     """
 
     c_filtrado = "%s_filtrado" % c_afiltrar
-    c_qflag = 'q_flag'
+    c_qflag = 'qMalo'
     # SECUENCIA DE PASOS NECESARIA PARA GENERAR UNA SERIE FILTRADA,
     # HAY QUE PASARLO A CODIGO PYTHON ASI LO INTEGRO AL PROGRAMA
     # Cosas que hay que correr para preparar la tabla para interpolarla
@@ -144,12 +144,17 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
-        sql = "ALTER TABLE {0}.{1} add column {2} varchar".format(
+        sql = "ALTER TABLE {0}.{1} add column {2} boolean".format(
             esquema, tabla, c_qflag)
         cursor.execute(sql)
 
-        print('Se creo la columna de flag de calidad')
+        print('Se creo la columna de flag de calidad (%s)' % c_qflag)
 
+        sql = "CREATE INDEX ON {0}.{1} (q_flag)".format(
+            esquema, tabla, c_qflag)
+        cursor.execute(sql)
+
+        print('Se asigno como indice (%s)' % c_qflag)
 
     # criterios de calidad revisar la documentacion del documento VAR_SAT,
     # consultar Camilo Bagnato
@@ -158,7 +163,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
 
     sql = """
     UPDATE {0}.{1}
-    SET {2} = 'malo'
+    SET {2} = TRUE
     WHERE {3}::int & 32768 = 32768
     OR {3}::int & 16384 = 16384
     OR {3}::int & 1024 = 1024
@@ -187,10 +192,11 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     sql = """
     UPDATE {0}.{1}
     SET {2} = {3}
-    WHERE {4} is null """.format(
+    WHERE NOT {4}""".format(
         esquema, tabla, c_filtrado, c_afiltrar, c_qflag)
     try:
         cursor.execute(sql)
+        print('Se asigno a la columna nueva el valor de origen (excepto malos)')
     except Exception as e:
         print(sql)
         print(e.pgerror)
