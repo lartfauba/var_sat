@@ -10,10 +10,10 @@
 #
 ########################################################################
 
-from FI_funciones import *
+import FI_funciones
 
 from argparse import ArgumentParser
-from utiles import *
+import utiles
 
 from sys import exit
 
@@ -31,25 +31,28 @@ parser.add_argument("--c_afiltrar", required=True)
 args = parser.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
-FI_funciones.logger = obtenerLogger('/tmp/FI.log')
+FI_funciones.logger = utiles.obtenerLogger('/tmp/FI.log')
 
 exit()
 
 cont = 0
-conn, cur = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+conn, cur = FI_funciones.conexionBaseDatos(
+    args.base, args.usuario, args.clave, args.servidor)
 
-## primero aplicar el filtro
-c_filtrado, c_qflag = filtradoIndice(cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
+# primero aplicar el filtro
+c_filtrado, c_qflag = FI_funciones.filtradoIndice(
+    cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
 conn.commit()
 
 pixeles = seriesInterpolar(cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
 for pixel in pixeles:
-    ## Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
+    # Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
     id_pixel = pixel[0]
-    interpoladorSerie(conn, cur, args.esquema, args.tabla, c_filtrado, args.c_pixel, id_pixel)
+    FI_funciones.interpoladorSerie(
+        conn, cur, args.esquema, args.tabla, c_filtrado, args.c_pixel, id_pixel)
     print(cont, total)
     cont += 1
-    #raw_input()
+    # raw_input()
     conn.commit()
 conn.close()
