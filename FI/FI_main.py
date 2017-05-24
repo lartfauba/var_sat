@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
 ########################################################################
+
 #
 # Filtrador/Intepolador
 #
@@ -10,8 +11,12 @@
 ########################################################################
 
 from FI_funciones import *
+
 from argparse import ArgumentParser                                              
-                                                                                 
+from utiles import *
+
+from sys import exit
+
 parser = ArgumentParser()                                                        
 parser.add_argument("--usuario", default='postgres')                             
 parser.add_argument("--clave", default='postgres')
@@ -24,6 +29,11 @@ parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)                             
                                                                                  
 args = parser.parse_args()  
+
+# TODO: Debe haber un modo mas elegante de hacerlo...
+FI_funciones.logger = obtenerLogger(args.logfile)
+
+exit()
 
 cont = 0
 conn, cur = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
@@ -38,7 +48,7 @@ for pixel in pixeles:
     ## Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
     id_pixel = pixel[0]
     interpoladorSerie(conn, cur, args.esquema, args.tabla, c_filtrado, args.c_pixel, id_pixel)
-    print cont, total
+    print(cont, total)
     cont += 1
     #raw_input()
     conn.commit()
