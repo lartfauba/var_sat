@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 ########################################################################
 
@@ -12,26 +12,26 @@
 
 from FI_funciones import *
 
-from argparse import ArgumentParser                                              
+from argparse import ArgumentParser
 from utiles import *
 
 from sys import exit
 
-parser = ArgumentParser()                                                        
-parser.add_argument("--usuario", default='postgres')                             
+parser = ArgumentParser()
+parser.add_argument("--usuario", default='postgres')
 parser.add_argument("--clave", default='postgres')
-parser.add_argument("--servidor", default='localhost')                           
-parser.add_argument("--base", default='var_sat_new')                                     
-parser.add_argument("--esquema", required=True)                                     
-parser.add_argument("--tabla", required=True)                                    
-parser.add_argument("--c_pixel", default='id_pixel')                             
-parser.add_argument("--c_calidad", default='q')                             
-parser.add_argument("--c_afiltrar", required=True)                             
-                                                                                 
-args = parser.parse_args()  
+parser.add_argument("--servidor", default='localhost')
+parser.add_argument("--base", default='var_sat_new')
+parser.add_argument("--esquema", required=True)
+parser.add_argument("--tabla", required=True)
+parser.add_argument("--c_pixel", default='id_pixel')
+parser.add_argument("--c_calidad", default='q')
+parser.add_argument("--c_afiltrar", required=True)
+
+args = parser.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
-FI_funciones.logger = obtenerLogger(args.logfile)
+FI_funciones.logger = obtenerLogger('/tmp/FI.log')
 
 exit()
 
