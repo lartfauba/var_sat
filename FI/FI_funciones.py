@@ -17,6 +17,8 @@ from scipy import interpolate as it
 import numpy as np
 import multiprocessing
 
+from IPython import embed  # Debug
+
 args = None
 logger = None
 
@@ -144,10 +146,12 @@ def _interpoladorSerie(argumentos):
     serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
-    l_lista = lista[lista[:, 2] is not True]  # Solo pixeles buenos
+    l_lista = lista[lista[:, 2] != True]  # Solo pixeles buenos
 
     logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
                 (id_serie, len(l_lista)))
+
+    embed()
 
     if len(l_lista) > 2:
         s_lista = l_lista[l_lista[:, 0].argsort()]
