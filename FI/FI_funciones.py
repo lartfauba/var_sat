@@ -123,7 +123,8 @@ def _interpoladorSerie(argumentos):
     """
     esquema, tabla, c_filtrado, c_pixel, id_serie = argumentos
 
-    sql = """	SELECT extract(epoch from fecha), {0}, {1}
+    sql = """
+    SELECT extract(epoch from fecha), {0}, {1}
     FROM {2}.{3}
     WHERE {4} = '{5}'""".format(
         c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
@@ -133,7 +134,7 @@ def _interpoladorSerie(argumentos):
     serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
-    l_lista = lista[lista[:, 2] != 'malo']
+    l_lista = lista[lista[:, 2] == False ]  # Solo pixeles buenos
 
     if len(l_lista) > 2:
         s_lista = l_lista[l_lista[:, 0].argsort()]
@@ -142,7 +143,7 @@ def _interpoladorSerie(argumentos):
         y = s_lista[:, 1]
         f = it.interp1d(x, y)
 
-        dias = lista[lista[:, 2] == 'malo']
+        dias = lista[lista[:, 2] == True ]  # Solo pixeles malos
 
         for dia in dias:
             try:
