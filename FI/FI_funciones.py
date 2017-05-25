@@ -154,8 +154,8 @@ def _interpoladorSerie(argumentos):
                 (id_serie, len(buenos)))
 
     if len(buenos) > 2:
-        x = buenos[:, 0]  # x -> fecha
-        y = buenos[:, 1]  # y -> c_ainterpolar
+        x = buenos[:, 0].astype(int)    # x -> fecha
+        y = buenos[:, 1].astype(float)  # y -> c_ainterpolar
         f = it.interp1d(x, y,
                         copy=False,
                         assume_sorted=True
