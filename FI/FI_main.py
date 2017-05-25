@@ -36,23 +36,27 @@ FI_funciones.logger = logger
 
 
 cont = 0
+
+logger.debug("Conectando a la base")
 conn, cur = FI_funciones.conexionBaseDatos(
     args.base, args.usuario, args.clave, args.servidor)
 
-# primero aplicar el filtro
+logger.debug("Filtrando")
 c_filtrado, c_qflag = FI_funciones.filtradoIndice(
     cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
 conn.commit()
 
+logger.debug("Obteniendo IDs de pixeles a interpolar")
 pixeles = FI_funciones.seriesInterpolar(
     cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
+
 for pixel in pixeles:
     # Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
     id_pixel = pixel[0]
     FI_funciones.interpoladorSerie(
         conn, cur, args.esquema, args.tabla, c_filtrado, args.c_pixel, id_pixel)
-    print(cont, total)
+    logger.info("Interpolando %d de %d" % (cont, total))
     cont += 1
     # raw_input()
     conn.commit()
