@@ -9,6 +9,7 @@
 #
 ########################################################################
 
+import utiles
 
 import psycopg2 as pg
 from psycopg2.extras import DictCursor
@@ -24,9 +25,11 @@ c_qflag = 'q_malo'
 
 
 # https://stackoverflow.com/questions/20640840/how-to-efficiently-have-multiproccessing-process-read-immutable-big-data
-def worker_init(conn):
-    global cursor
-    cursor = conn.cursor(cursor_factory=DictCursor)
+def worker_init(args):
+    global dbConn, dbCurs, logger
+    logger = utiles.obtenerLogger('/tmp/FI.log')
+    dbConn, dbCurs = conexionBaseDatos(
+        args.base, args.usuario, args.clave, args.servidor)
 
 
 def conexionBaseDatos(database, user, password, host):
@@ -121,8 +124,8 @@ def _interpoladorSerie(esquema, tabla, c_filtrado, c_pixel, id_serie):
         c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
 
     logger.debug(sql)
-    cursor.execute(sql)
-    serie_focal = cursor.fetchall()
+    dbCurs.execute(sql)
+    serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
     l_lista = lista[lista[:, 2] != 'malo']
@@ -153,7 +156,7 @@ def _interpoladorSerie(esquema, tabla, c_filtrado, c_pixel, id_serie):
 
             try:
                 logger.debug(sql)
-                cursor.execute(sql)
+                dbCurs.execute(sql)
             except Exception as e:
                 print(sql)
                 print(e.pgerror)
