@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 ########################################################################
-
 #
 # Filtrador/Intepolador
 #
@@ -11,9 +10,10 @@
 ########################################################################
 
 import FI_funciones
+import utiles
 
 from argparse import ArgumentParser
-import utiles
+from multiprocessing import cpu_count
 
 # from sys import exit
 
@@ -27,6 +27,11 @@ parser.add_argument("--tabla", required=True)
 parser.add_argument("--c_pixel", default='id_pixel')
 parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)
+
+# Parmetros del script
+parser.add_argument("--workers", type=int, default=cpu_count(),
+                    help="""Número de hilos para realizar la carga de las imágenes.
+                    Por defecto es el número de procesadores disponibles.""")
 
 args = parser.parse_args()
 
@@ -62,13 +67,9 @@ pixeles = FI_funciones.seriesInterpolar(
 total = len(pixeles)
 
 logger.debug("Obtuve %d pixeles" % total)
-for pixel in pixeles:
-    # Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
-    id_pixel = pixel[0]
-    logger.info("Interpolando %d de %d" % (cont, total))
-    FI_funciones.interpoladorSerie(
-        cur, args.esquema, args.tabla, c_filtrado, args.c_pixel, id_pixel)
-    cont += 1
-    # raw_input()
-    # conn.commit()
+
+pixeles = [pixel[0] for pixel in pixeles]  # Me quedo con el id solamente
+
+FI_funciones.interpoladorSerie(conn, pixeles, c_filtrado, args.workers)
+
 conn.close()
