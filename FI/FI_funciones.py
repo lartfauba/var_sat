@@ -91,7 +91,7 @@ def interpoladorSerie(conn, pixeles, c_filtrado, workers=1):
         cola = multiprocessing.Pool(
             processes=workers,
             initializer=worker_init,
-            initargs=(conn,)  # Cada worker va a sacar un cursor propio
+            initargs=(args,)  # Cada worker va a levantar su propia conexion
         )
         logger.debug("Cargando tareas")
         cola.map_async(_interpoladorSerie, argumentos)
