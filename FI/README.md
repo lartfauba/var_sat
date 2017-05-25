@@ -6,7 +6,7 @@
 * Documentar el uso
 * Incluir la variable de base de datos en el script de plsh
 * Utilizar un archivo de configuración para el usuario/clave del script de python
-* Logging MP (https://stackoverflow.com/questions/641420/how-should-i-log-while-using-multiprocessing-in-python)
+* Buscar la forma de monitorear el proceso asincrono
 
 ## Instalación del script de Filtrado/Interpolado
 
