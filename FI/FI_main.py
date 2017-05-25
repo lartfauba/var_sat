@@ -50,15 +50,6 @@ conn, cur = FI_funciones.conexionBaseDatos(
 FI_funciones.dbConn = conn
 FI_funciones.dbCurs = cur
 
-""" Warning: By default, any query execution, including a simple SELECT will
-start a transaction: for long-running programs, if no further action is taken,
-the session will remain “idle in transaction”, an undesirable condition for
-several reasons (locks are held by the session, tables bloat...) For long lived
-scripts, either ensure to terminate a transaction as soon as possible or use
-an autocommit connection.
-http://initd.org/psycopg/docs/connection.html#connection.autocommit
-"""
-conn.set_session(autocommit=True)
 
 logger.debug("Filtrando")
 c_filtrado, c_qflag = FI_funciones.filtradoIndice(

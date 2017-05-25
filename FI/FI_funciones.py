@@ -52,6 +52,16 @@ def conexionBaseDatos(database, user, password, host):
 
     cursor = conn.cursor(cursor_factory=DictCursor)
 
+    """ Warning: By default, any query execution, including a simple SELECT will
+    start a transaction: for long-running programs, if no further action is
+    taken, the session will remain “idle in transaction”, an undesirable
+    condition for several reasons (locks are held by the session, tables
+    bloat...) For long lived scripts, either ensure to terminate a transaction
+    as soon as possible or use an autocommit connection.
+    http://initd.org/psycopg/docs/connection.html#connection.autocommit
+    """
+    conn.set_session(autocommit=True)
+
     return conn, cursor
 
 
@@ -76,7 +86,7 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
         c_pixel, esquema, tabla, c_qflag)
 
-    logger.debug(sql)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
     pixels_a_interpolar = cursor.fetchall()
     return pixels_a_interpolar
@@ -129,13 +139,15 @@ def _interpoladorSerie(argumentos):
     WHERE {4} = '{5}'""".format(
         c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
 
-    logger.debug(sql)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     dbCurs.execute(sql)
     serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
-    l_lista = lista[lista[:, 2] == False ]  # Solo pixeles buenos
+    l_lista = lista[lista[:, 2] is not True]  # Solo pixeles buenos
 
+    logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
+                len(l_lista))
     if len(l_lista) > 2:
         s_lista = l_lista[l_lista[:, 0].argsort()]
 
@@ -143,7 +155,9 @@ def _interpoladorSerie(argumentos):
         y = s_lista[:, 1]
         f = it.interp1d(x, y)
 
-        dias = lista[lista[:, 2] == True ]  # Solo pixeles malos
+        dias = lista[lista[:, 2] is True]  # Solo pixeles malos
+        logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
+                    len(dias))
 
         for dia in dias:
             try:
@@ -161,7 +175,7 @@ def _interpoladorSerie(argumentos):
                        c_pixel, id_serie, dia[0])
 
             try:
-                logger.debug(sql)
+                logger.debug("Ejecutando SQL: %s" % sql.rstrip())
                 dbCurs.execute(sql)
             except Exception as e:
                 print(sql)
@@ -194,20 +208,20 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
     AND column_name = '{2}' """.format(esquema, tabla, c_qflag)
-    logger.debug(sql)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} add column {2} boolean".format(
             esquema, tabla, c_qflag)
-        logger.debug(sql)
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
 
         print('Se creo la columna de flag de calidad (%s)' % c_qflag)
 
         sql = "CREATE INDEX ON {0}.{1} ({2})".format(
             esquema, tabla, c_qflag)
-        logger.debug(sql)
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
 
         print('Se asigno como indice (%s)' % c_qflag)
@@ -224,7 +238,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     OR {3}::int & 16384 = 16384
     OR {3}::int & 1024 = 1024
     OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
-    logger.debug(sql)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
     print('Se activo la columna (%s) para los pixeles malos' % c_qflag)
@@ -236,13 +250,13 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
     AND column_name = '{2}' """.format(esquema, tabla, c_filtrado)
-    logger.debug(sql)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} ADD COLUMN {2} float".format(
             esquema, tabla, c_filtrado)
-        logger.debug(sql)
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
         print('Se creo la columna de indice filtrado')
 
@@ -256,7 +270,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
         esquema, tabla, c_filtrado, c_afiltrar, c_qflag)
 
     try:
-        logger.debug(sql)
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
         print('Se asigno a la columna nueva el valor de origen (excepto malos)')
     except Exception as e:
