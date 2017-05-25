@@ -133,7 +133,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     """
 
     c_filtrado = "%s_filtrado" % c_afiltrar
-    c_qflag = 'qMalo'
+    c_qflag = 'q_malo'
     # SECUENCIA DE PASOS NECESARIA PARA GENERAR UNA SERIE FILTRADA,
     # HAY QUE PASARLO A CODIGO PYTHON ASI LO INTEGRO AL PROGRAMA
     # Cosas que hay que correr para preparar la tabla para interpolarla
