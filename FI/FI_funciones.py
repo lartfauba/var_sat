@@ -16,6 +16,7 @@ from scipy import interpolate as it
 import numpy as np
 
 logger = None
+c_qflag = 'q_malo'
 
 def conexionBaseDatos(database, user, password, host):
     """
@@ -76,9 +77,9 @@ def interpoladorSerie(conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_seri
     ----------
 
     """
-    sql = """	SELECT extract(epoch from fecha), {0}, q_flag
-    FROM {1}.{2}
-    WHERE {3} = '{4}'""".format(c_filtrado, esquema, tabla, c_pixel, id_serie)
+    sql = """	SELECT extract(epoch from fecha), {0}, {1}
+    FROM {2}.{3}
+    WHERE {4} = '{5}'""".format(c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
 
     logger.debug(sql)
     cursor.execute(sql)
@@ -133,7 +134,6 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     """
 
     c_filtrado = "%s_filtrado" % c_afiltrar
-    c_qflag = 'q_malo'
     # SECUENCIA DE PASOS NECESARIA PARA GENERAR UNA SERIE FILTRADA,
     # HAY QUE PASARLO A CODIGO PYTHON ASI LO INTEGRO AL PROGRAMA
     # Cosas que hay que correr para preparar la tabla para interpolarla
