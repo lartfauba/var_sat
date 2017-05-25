@@ -105,8 +105,6 @@ def interpoladorSerie(args, pixeles, c_filtrado, workers=1):
         logger.info("Terminaron todas las tareas")
 
     else:  # PROCESAMIENTO SECUENCIAL:
-        dbConn, dbCurs = conexionBaseDatos(
-            args.base, args.usuario, args.clave, args.servidor)
         map(_interpoladorSerie, argumentos)
 
 

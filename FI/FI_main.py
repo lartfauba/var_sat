@@ -47,6 +47,9 @@ logger.debug("Conectando a la base")
 conn, cur = FI_funciones.conexionBaseDatos(
     args.base, args.usuario, args.clave, args.servidor)
 
+FI_funciones.dbConn = conn
+FI_funciones.dbCurs = cur
+
 """ Warning: By default, any query execution, including a simple SELECT will
 start a transaction: for long-running programs, if no further action is taken,
 the session will remain “idle in transaction”, an undesirable condition for
@@ -66,10 +69,10 @@ logger.debug("Obteniendo IDs de pixeles a interpolar")
 pixeles = FI_funciones.seriesInterpolar(
     cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
-conn.close()
 
 logger.debug("Obtuve %d pixeles" % total)
 
 pixeles = [pixel[0] for pixel in pixeles]  # Me quedo con el id solamente
 
 FI_funciones.interpoladorSerie(args, pixeles, c_filtrado, args.workers)
+conn.close()
