@@ -66,11 +66,10 @@ logger.debug("Obteniendo IDs de pixeles a interpolar")
 pixeles = FI_funciones.seriesInterpolar(
     cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
+conn.close()
 
 logger.debug("Obtuve %d pixeles" % total)
 
 pixeles = [pixel[0] for pixel in pixeles]  # Me quedo con el id solamente
 
-FI_funciones.interpoladorSerie(conn, pixeles, c_filtrado, args.workers)
-
-conn.close()
+FI_funciones.interpoladorSerie(args, pixeles, c_filtrado, args.workers)
