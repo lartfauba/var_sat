@@ -138,7 +138,9 @@ def _interpoladorSerie(argumentos):
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}
     FROM {2}.{3}
-    WHERE {4} = '{5}'""".format(
+    WHERE {4} = '{5}'
+    ORDER BY fecha
+    """.format(
         c_ainterpolar, c_qflag, esquema, tabla, c_pixel, id_serie)
 
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
@@ -146,29 +148,30 @@ def _interpoladorSerie(argumentos):
     serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
-    l_lista = lista[lista[:, 2] != True]  # Solo pixeles buenos
+    buenos = lista[lista[:, 2] != True]  # Solo pixeles buenos
 
     logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
-                (id_serie, len(l_lista)))
+                (id_serie, len(buenos)))
 
-    if len(l_lista) > 2:
-        s_lista = l_lista[l_lista[:, 0].argsort()]
+    if len(buenos) > 2:
+        x = buenos[:, 0]  # x -> fecha
+        y = buenos[:, 1]  # y -> c_ainterpolar
+        f = it.interp1d(x, y,
+                        copy=False,
+                        assume_sorted=True
+                        )
 
-        x = s_lista[:, 0]
-        y = s_lista[:, 1]
-        f = it.interp1d(x, y)
-
-        dias = lista[lista[:, 2] == True]  # Solo pixeles malos
+        malos = lista[lista[:, 2] == True]  # Solo pixeles malos
         logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
-                    (id_serie, len(dias)))
+                    (id_serie, len(malos)))
 
-        for dia in dias:
+        for m in malos:
             try:
-                interpolado = f(dia[0])
+                interpolado = f(m[0])
                 # print dias, dia[0], id_serie, interpolado
             except:
                 logger.debug("Error interpolando el dia %s de %s" %
-                             (dia[0], id_serie))
+                             (m[0], id_serie))
                 continue
 
             sql = """
@@ -177,7 +180,7 @@ def _interpoladorSerie(argumentos):
             WHERE {4} = '{5}'
             AND fecha = to_timestamp({6})::date+1
             """.format(esquema, tabla, c_ainterpolar, str(interpolado),
-                       c_pixel, id_serie, dia[0])
+                       c_pixel, id_serie, m[0])
 
             try:
                 logger.debug("Ejecutando SQL: %s" % sql.rstrip())
