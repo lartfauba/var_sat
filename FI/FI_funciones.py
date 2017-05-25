@@ -79,7 +79,7 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     return pixels_a_interpolar
 
 
-def interpoladorSerie(conn, pixeles, c_filtrado, workers=1):
+def interpoladorSerie(args, pixeles, c_filtrado, workers=1):
     logger.info("Preparandose para interpolar %d pixeles con %d workers" %
                 (len(pixeles), workers))
 
@@ -105,7 +105,7 @@ def interpoladorSerie(conn, pixeles, c_filtrado, workers=1):
         map(_interpoladorSerie, argumentos)
 
 
-def _interpoladorSerie(esquema, tabla, c_filtrado, c_pixel, id_serie):
+def _interpoladorSerie(argumentos):
     """
     Dado un id de pixel genera las interpolaciones necesarias para completar
     la serie de datos y realiza los update de los datos en los lugares
@@ -118,6 +118,8 @@ def _interpoladorSerie(esquema, tabla, c_filtrado, c_pixel, id_serie):
     ----------
 
     """
+    esquema, tabla, c_filtrado, c_pixel, id_serie = argumentos
+
     sql = """	SELECT extract(epoch from fecha), {0}, {1}
     FROM {2}.{3}
     WHERE {4} = '{5}'""".format(
