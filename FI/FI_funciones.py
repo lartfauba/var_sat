@@ -14,12 +14,19 @@ import psycopg2 as pg
 from psycopg2.extras import DictCursor
 from scipy import interpolate as it
 import numpy as np
+import multiprocessing
 
 args = None
 logger = None
 
 # El nombre de la columna booleana
 c_qflag = 'q_malo'
+
+
+# https://stackoverflow.com/questions/20640840/how-to-efficiently-have-multiproccessing-process-read-immutable-big-data
+def worker_init(conn):
+    global cursor
+    cursor = conn.cursor(cursor_factory=DictCursor)
 
 
 def conexionBaseDatos(database, user, password, host):
@@ -69,8 +76,33 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     return pixels_a_interpolar
 
 
-def interpoladorSerie(conn, cursor,
-                      esquema, tabla, c_filtrado, c_pixel, id_serie):
+def interpoladorSerie(conn, pixeles, c_filtrado, workers=1):
+    logger.info("Preparandose para interpolar %d pixeles con %d workers" %
+                (len(pixeles), workers))
+
+    argumentos = [(args.esquema, args.tabla,
+                   c_filtrado, args.c_pixel, i) for i in pixeles]
+
+    if workers > 1:  # PROCESAMIENTO EN PARALELO
+        logger.debug("Iniciando Pool")
+        cola = multiprocessing.Pool(
+            processes=workers,
+            initializer=worker_init,
+            initargs=(conn,)  # Cada worker va a sacar un cursor propio
+        )
+        logger.debug("Cargando tareas")
+        cola.map_async(_interpoladorSerie, argumentos)
+        # cola.map_async(fPrueba, argumentos)
+        cola.close()
+        logger.info("Esperando a que las tareas terminen")
+        cola.join()
+        logger.info("Terminaron todas las tareas")
+
+    else:  # PROCESAMIENTO SECUENCIAL:
+        map(_interpoladorSerie, argumentos)
+
+
+def _interpoladorSerie(esquema, tabla, c_filtrado, c_pixel, id_serie):
     """
     Dado un id de pixel genera las interpolaciones necesarias para completar
     la serie de datos y realiza los update de los datos en los lugares
