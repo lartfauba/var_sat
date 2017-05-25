@@ -150,8 +150,8 @@ def _interpoladorSerie(argumentos):
     lista = np.array(serie_focal)
     buenos = lista[lista[:, 2] != True]  # Solo pixeles buenos
 
-    logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
-                (id_serie, len(buenos)))
+    logger.debug("La serie de id_pixel = %d tiene %d pixeles buenos" %
+                 (id_serie, len(buenos)))
 
     if len(buenos) > 2:
         x = buenos[:, 0].astype(int)    # x -> fecha
@@ -167,10 +167,10 @@ def _interpoladorSerie(argumentos):
 
         for m in malos:
             try:
-                interpolado = f(m[0])
+                interpolado = f(m[0])  # Floor? Int?
                 # print dias, dia[0], id_serie, interpolado
             except:
-                logger.debug("Error interpolando el dia %s de %s" %
+                logger.error("Error interpolando el dia %s de %s" %
                              (m[0], id_serie))
                 continue
 
@@ -186,8 +186,7 @@ def _interpoladorSerie(argumentos):
                 logger.debug("Ejecutando SQL: %s" % sql.rstrip())
                 dbCurs.execute(sql)
             except Exception as e:
-                print(sql)
-                print(e.pgerror)
+                logger.error("Error: %s" % e.pgerror)
             # conn.commit()
 
 
@@ -277,10 +276,13 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
         print('Se creo la columna de indice original')
 
     # Me copio a la columna nueva el valor original de cada registro
+    # Siempre y cuando no lo haya hecho antes!
     sql = """
     UPDATE {0}.{1}
     SET {2} = {3}
-    WHERE {4}""".format(
+    WHERE {4}
+    AND {2} IS NULL
+    """.format(
         esquema, tabla, c_original, c_afiltrar, c_qflag)
 
     try:

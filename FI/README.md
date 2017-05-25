@@ -6,7 +6,7 @@
 * Documentar el uso
 * Incluir la variable de base de datos en el script de plsh
 * Utilizar un archivo de configuración para el usuario/clave del script de python
-* Buscar la forma de monitorear el proceso asincrono
+* Usar un threading.manager para monitorear el progreso
 
 ## Instalación del script de Filtrado/Interpolado
 
