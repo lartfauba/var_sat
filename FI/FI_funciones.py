@@ -15,8 +15,12 @@ from psycopg2.extras import DictCursor
 from scipy import interpolate as it
 import numpy as np
 
+args = None
 logger = None
+
+# El nombre de la columna booleana
 c_qflag = 'q_malo'
+
 
 def conexionBaseDatos(database, user, password, host):
     """
@@ -58,17 +62,19 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
 
     sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
         c_pixel, esquema, tabla, c_qflag)
-    # cursor.execute("select distinct "+columna_pixel+" from "+tabla+" where "+columna_flag_calidad+" = 'malo';")
+
     logger.debug(sql)
     cursor.execute(sql)
     pixels_a_interpolar = cursor.fetchall()
     return pixels_a_interpolar
 
 
-def interpoladorSerie(conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_serie):
+def interpoladorSerie(conn, cursor,
+                      esquema, tabla, c_filtrado, c_pixel, id_serie):
     """
-    Dado un id de pixel genera las interpolaciones necesarias para completar la serie de datos
-    y realiza los update de los datos en los lugares correspondientes
+    Dado un id de pixel genera las interpolaciones necesarias para completar
+    la serie de datos y realiza los update de los datos en los lugares
+    correspondientes
 
     Argumentos
     ----------
@@ -79,7 +85,8 @@ def interpoladorSerie(conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_seri
     """
     sql = """	SELECT extract(epoch from fecha), {0}, {1}
     FROM {2}.{3}
-    WHERE {4} = '{5}'""".format(c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
+    WHERE {4} = '{5}'""".format(
+        c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
 
     logger.debug(sql)
     cursor.execute(sql)
@@ -181,8 +188,6 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
 
     print('Se activo la columna (%s) para los pixeles malos' % c_qflag)
 
-    # cursor.execute("UPDATE "+ tabla +" set "+ columna_flag_calidad +" = 'malo' WHERE "+columna_calidad+"::int & 32768 = 32768 OR "+columna_calidad+"::int & 16384 = 16384 OR "+columna_calidad+"::int & 1024 = 1024 OR "+columna_calidad+"::int & 192 != 64;")
-
     # crear una columna iv_filtrado
     # alter table <tabla> add column evi_filtrado float;_flag_calidad
     sql = """
@@ -200,8 +205,8 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
         cursor.execute(sql)
         print('Se creo la columna de indice filtrado')
 
-    ## copiar las filas que no tengan valor 'malo'
-    ## update <tabla> set <iv>_filtrado = <iv> where q_flag is null;
+    # copiar las filas que no tengan valor 'malo'
+    # update <tabla> set <iv>_filtrado = <iv> where q_flag is null;
 
     sql = """
     UPDATE {0}.{1}
