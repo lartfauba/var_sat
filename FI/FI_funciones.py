@@ -15,6 +15,7 @@ from psycopg2.extras import DictCursor
 from scipy import interpolate as it
 import numpy as np
 
+logger = None
 
 def conexionBaseDatos(database, user, password, host):
     """
@@ -57,6 +58,7 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
         c_pixel, esquema, tabla, c_qflag)
     # cursor.execute("select distinct "+columna_pixel+" from "+tabla+" where "+columna_flag_calidad+" = 'malo';")
+    logger.debug(sql)
     cursor.execute(sql)
     pixels_a_interpolar = cursor.fetchall()
     return pixels_a_interpolar
@@ -78,6 +80,7 @@ def interpoladorSerie(conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_seri
     FROM {1}.{2}
     WHERE {3} = '{4}'""".format(c_filtrado, esquema, tabla, c_pixel, id_serie)
 
+    logger.debug(sql)
     cursor.execute(sql)
     serie_focal = cursor.fetchall()
 
@@ -109,11 +112,13 @@ def interpoladorSerie(conn, cursor, esquema, tabla, c_filtrado, c_pixel, id_seri
                        c_pixel, id_serie, dia[0])
 
             try:
+                logger.debug(sql)
                 cursor.execute(sql)
             except Exception as e:
                 print(sql)
                 print(e.pgerror)
             # conn.commit()
+
 
 def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     """
@@ -141,17 +146,20 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
     AND column_name = '{2}' """.format(esquema, tabla, c_qflag)
+    logger.debug(sql)
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} add column {2} boolean".format(
             esquema, tabla, c_qflag)
+        logger.debug(sql)
         cursor.execute(sql)
 
         print('Se creo la columna de flag de calidad (%s)' % c_qflag)
 
         sql = "CREATE INDEX ON {0}.{1} ({2})".format(
             esquema, tabla, c_qflag)
+        logger.debug(sql)
         cursor.execute(sql)
 
         print('Se asigno como indice (%s)' % c_qflag)
@@ -168,6 +176,10 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     OR {3}::int & 16384 = 16384
     OR {3}::int & 1024 = 1024
     OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
+    logger.debug(sql)
+    cursor.execute(sql)
+
+    print('Se activo la columna (%s) para los pixeles malos' % c_qflag)
 
     # cursor.execute("UPDATE "+ tabla +" set "+ columna_flag_calidad +" = 'malo' WHERE "+columna_calidad+"::int & 32768 = 32768 OR "+columna_calidad+"::int & 16384 = 16384 OR "+columna_calidad+"::int & 1024 = 1024 OR "+columna_calidad+"::int & 192 != 64;")
 
@@ -178,11 +190,13 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
     AND column_name = '{2}' """.format(esquema, tabla, c_filtrado)
+    logger.debug(sql)
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} ADD COLUMN {2} float".format(
             esquema, tabla, c_filtrado)
+        logger.debug(sql)
         cursor.execute(sql)
         print('Se creo la columna de indice filtrado')
 
@@ -194,7 +208,9 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     SET {2} = {3}
     WHERE NOT {4}""".format(
         esquema, tabla, c_filtrado, c_afiltrar, c_qflag)
+
     try:
+        logger.debug(sql)
         cursor.execute(sql)
         print('Se asigno a la columna nueva el valor de origen (excepto malos)')
     except Exception as e:

@@ -51,6 +51,8 @@ pixeles = FI_funciones.seriesInterpolar(
     cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
 total = len(pixeles)
 
+logger.debug("Obtuve")
+
 for pixel in pixeles:
     # Aplico las interpolaciones para cada uno de los pixeles que lo necesitan
     id_pixel = pixel[0]
