@@ -150,7 +150,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
 
         print('Se creo la columna de flag de calidad (%s)' % c_qflag)
 
-        sql = "CREATE INDEX ON {0}.{1} (q_flag)".format(
+        sql = "CREATE INDEX ON {0}.{1} ({2})".format(
             esquema, tabla, c_qflag)
         cursor.execute(sql)
 
