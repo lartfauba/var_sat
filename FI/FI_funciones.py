@@ -147,7 +147,8 @@ def _interpoladorSerie(argumentos):
     l_lista = lista[lista[:, 2] is not True]  # Solo pixeles buenos
 
     logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
-                (id_serie, len(l_lista))
+                (id_serie, len(l_lista)))
+
     if len(l_lista) > 2:
         s_lista = l_lista[l_lista[:, 0].argsort()]
 
@@ -157,7 +158,7 @@ def _interpoladorSerie(argumentos):
 
         dias = lista[lista[:, 2] is True]  # Solo pixeles malos
         logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
-                    (id_serie, len(dias))
+                    (id_serie, len(dias)))
 
         for dia in dias:
             try:
