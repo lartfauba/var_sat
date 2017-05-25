@@ -17,7 +17,7 @@ from scipy import interpolate as it
 import numpy as np
 import multiprocessing
 
-from IPython import embed  # Debug
+# from IPython import embed  # Debug
 
 args = None
 logger = None
@@ -133,13 +133,13 @@ def _interpoladorSerie(argumentos):
     ----------
 
     """
-    esquema, tabla, c_filtrado, c_pixel, id_serie = argumentos
+    esquema, tabla, c_ainterpolar, c_pixel, id_serie = argumentos
 
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}
     FROM {2}.{3}
     WHERE {4} = '{5}'""".format(
-        c_filtrado, c_qflag, esquema, tabla, c_pixel, id_serie)
+        c_ainterpolar, c_qflag, esquema, tabla, c_pixel, id_serie)
 
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     dbCurs.execute(sql)
@@ -151,8 +151,6 @@ def _interpoladorSerie(argumentos):
     logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
                 (id_serie, len(l_lista)))
 
-    embed()
-
     if len(l_lista) > 2:
         s_lista = l_lista[l_lista[:, 0].argsort()]
 
@@ -160,7 +158,7 @@ def _interpoladorSerie(argumentos):
         y = s_lista[:, 1]
         f = it.interp1d(x, y)
 
-        dias = lista[lista[:, 2] is True]  # Solo pixeles malos
+        dias = lista[lista[:, 2] == True]  # Solo pixeles malos
         logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
                     (id_serie, len(dias)))
 
@@ -169,14 +167,16 @@ def _interpoladorSerie(argumentos):
                 interpolado = f(dia[0])
                 # print dias, dia[0], id_serie, interpolado
             except:
-                interpolado = -9999
+                logger.debug("Error interpolando el dia %s de %s" %
+                             (dia[0], id_serie))
+                continue
 
             sql = """
             UPDATE {0}.{1}
             SET {2} = {3}
             WHERE {4} = '{5}'
             AND fecha = to_timestamp({6})::date+1
-            """.format(esquema, tabla, c_filtrado, str(interpolado),
+            """.format(esquema, tabla, c_ainterpolar, str(interpolado),
                        c_pixel, id_serie, dia[0])
 
             try:
@@ -200,7 +200,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
 
     """
 
-    c_filtrado = "%s_filtrado" % c_afiltrar
+    c_original = "%s_original" % c_afiltrar
     # SECUENCIA DE PASOS NECESARIA PARA GENERAR UNA SERIE FILTRADA,
     # HAY QUE PASARLO A CODIGO PYTHON ASI LO INTEGRO AL PROGRAMA
     # Cosas que hay que correr para preparar la tabla para interpolarla
@@ -222,14 +222,13 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
 
-        print('Se creo la columna de flag de calidad (%s)' % c_qflag)
-
         sql = "CREATE INDEX ON {0}.{1} ({2})".format(
             esquema, tabla, c_qflag)
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
 
-        print('Se asigno como indice (%s)' % c_qflag)
+        logger.info('%s.%s: Se creo la columna (indice) de flag de calidad (%s)'
+                    % (esquema, tabla, c_qflag))
 
     # criterios de calidad revisar la documentacion del documento VAR_SAT,
     # consultar Camilo Bagnato
@@ -242,11 +241,20 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE {3}::int & 32768 = 32768
     OR {3}::int & 16384 = 16384
     OR {3}::int & 1024 = 1024
-    OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
+     OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
-    print('Se activo la columna (%s) para los pixeles malos' % c_qflag)
+    logger.info('(%s = TRUE) para los pixeles malos' % c_qflag)
+
+    sql = """
+    UPDATE {0}.{1}
+    SET {2} = FALSE
+    WHERE NOT {2}""".format(esquema, tabla, c_qflag)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    cursor.execute(sql)
+
+    logger.info('(%s = FALSE) para los pixeles buenos' % c_qflag)
 
     # crear una columna iv_filtrado
     # alter table <tabla> add column evi_filtrado float;_flag_calidad
@@ -254,32 +262,30 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
-    AND column_name = '{2}' """.format(esquema, tabla, c_filtrado)
+    AND column_name = '{2}' """.format(esquema, tabla, c_original)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} ADD COLUMN {2} float".format(
-            esquema, tabla, c_filtrado)
+            esquema, tabla, c_original)
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
-        print('Se creo la columna de indice filtrado')
+        print('Se creo la columna de indice original')
 
-    # copiar las filas que no tengan valor 'malo'
-    # update <tabla> set <iv>_filtrado = <iv> where q_flag is null;
-
+    # Me copio a la columna nueva el valor original de cada registro
     sql = """
     UPDATE {0}.{1}
     SET {2} = {3}
-    WHERE NOT {4}""".format(
-        esquema, tabla, c_filtrado, c_afiltrar, c_qflag)
+    WHERE {4}""".format(
+        esquema, tabla, c_original, c_afiltrar, c_qflag)
 
     try:
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
-        print('Se asigno a la columna nueva el valor de origen (excepto malos)')
+        logger.info('%s.%s: Se copio %s a %s cuando la calidad es mala')
     except Exception as e:
         print(sql)
         print(e.pgerror)
 
-    return c_filtrado, c_qflag
+    return c_original, c_qflag

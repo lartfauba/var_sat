@@ -52,7 +52,7 @@ FI_funciones.dbCurs = cur
 
 
 logger.debug("Filtrando")
-c_filtrado, c_qflag = FI_funciones.filtradoIndice(
+c_original, c_qflag = FI_funciones.filtradoIndice(
     cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
 # conn.commit()
 
@@ -65,5 +65,5 @@ logger.debug("Obtuve %d pixeles" % total)
 
 pixeles = [pixel[0] for pixel in pixeles]  # Me quedo con el id solamente
 
-FI_funciones.interpoladorSerie(args, pixeles, c_filtrado, args.workers)
+FI_funciones.interpoladorSerie(args, pixeles, args.c_afiltrar, args.workers)
 conn.close()
