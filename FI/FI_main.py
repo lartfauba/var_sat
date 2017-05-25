@@ -34,10 +34,11 @@ parser.add_argument("--workers", type=int, default=cpu_count(),
                     Por defecto es el número de procesadores disponibles.""")
 
 args = parser.parse_args()
+logger = utiles.obtenerLogger('/tmp/FI.log')
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
-logger = utiles.obtenerLogger('/tmp/FI.log')
 FI_funciones.logger = logger
+FI_funciones.args = args
 
 
 cont = 0
