@@ -5,7 +5,9 @@
 #
 # Filtrador/Intepolador
 #
-# author:Gonzalo Garcia Accinelli https://github.com/gonzalogacc
+# autores varios
+# v1: Gonzalo Garcia Accinelli https://github.com/gonzalogacc
+# v2: David Vinazza https://github.com/dvinazza/
 #
 ########################################################################
 
