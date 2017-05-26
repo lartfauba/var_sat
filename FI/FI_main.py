@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ########################################################################
@@ -39,9 +39,8 @@ logger = utiles.obtenerLogger('/tmp/FI.log')
 # TODO: Debe haber un modo mas elegante de hacerlo...
 FI_funciones.logger = logger
 FI_funciones.args = args
+c_qflag = FI_funciones.c_qflag  # TODO: Pasar a un argumento
 
-
-cont = 0
 
 logger.debug("Conectando a la base")
 conn, cur = FI_funciones.conexionBaseDatos(
@@ -51,19 +50,16 @@ FI_funciones.dbConn = conn
 FI_funciones.dbCurs = cur
 
 
-logger.debug("Filtrando")
-c_original, c_qflag = FI_funciones.filtradoIndice(
+logger.info("Filtrando")
+FI_funciones.filtradoIndice(
     cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
-# conn.commit()
 
-logger.debug("Obteniendo IDs de pixeles a interpolar")
-pixeles = FI_funciones.seriesInterpolar(
-    cur, args.esquema, args.tabla, args.c_pixel, c_qflag)
-total = len(pixeles)
+logger.info("Obteniendo IDs de series a interpolar")
+series = FI_funciones.seriesInterpolar(
+    cur, args.esquema, args.tabla, args.c_pixel)
 
-logger.debug("Obtuve %d pixeles" % total)
+logger.info("Interpolando %d series" % len(series))
+pixeles = [i[0] for i in series]  # Me quedo con el id solamente
+FI_funciones.interpoladorSerie(args, series, args.c_afiltrar, args.workers)
 
-pixeles = [pixel[0] for pixel in pixeles]  # Me quedo con el id solamente
-
-FI_funciones.interpoladorSerie(args, pixeles, args.c_afiltrar, args.workers)
 conn.close()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ########################################################################
@@ -94,17 +94,48 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     return pixels_a_interpolar
 
 
-def interpoladorSerie(args, pixeles, c_ainterpolar, workers=1):
-    logger.info("Preparandose para interpolar %s (%d series) con %d workers" %
-                (c_ainterpolar, len(pixeles), workers))
+def interpoladorSerie(cursor, args, pixeles):
+    logger.info("%s.%s.%s: Interpolando %d series con %d workers" %
+                (args.esquema, args.tabla, args.c_ainterpolar,
+                 len(pixeles), args.workers))
 
-    tareas = [(args.esquema, args.tabla,
-               c_ainterpolar, args.c_pixel, i) for i in pixeles]
+    c_original = "%s_original" % args.c_ainterpolar
+    crearColumna(cursor, args.esquema, args.tabla, c_original, "float")
+    # Siempre float?
 
-    if workers > 1:  # PROCESAMIENTO EN PARALELO
+    sql = """
+    UPDATE {0}.{1}
+    SET {2} = {3}
+    WHERE {4}
+    AND {2} IS NULL
+    """.format(
+        args.esquema, args.tabla, c_original, args.c_afiltrar, c_qflag)
+
+    try:
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+        cursor.execute(sql)
+        logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala')
+    except Exception as e:
+        logger.error("Error: %s" % e.pgerror)
+
+    c_seinterpolo = "%s_seinterpolo" % args._ainterpolar
+    crearColumna(cursor, args.esquema, args.tabla, c_seinterpolo, "boolean")
+
+    sql = """
+    UPDATE {0}.{1}
+    SET {2} = FALSE
+    """.format(args.esquema, args.tabla, c_seinterpolo)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    cursor.execute(sql)
+    # logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala')
+
+    # TODO: Cambiar args por un dict?
+    tareas = [(args, c_seinterpolo, i) for i in pixeles]
+
+    if args.workers > 1:  # PROCESAMIENTO EN PARALELO
         logger.debug("Iniciando Pool")
         cola = multiprocessing.Pool(
-            processes=workers,
+            processes=args.workers,
             initializer=worker_init,
             initargs=(args,)  # Cada worker va a levantar su propia conexion
         )
@@ -133,7 +164,7 @@ def _interpoladorSerie(tarea):
     ----------
 
     """
-    esquema, tabla, c_ainterpolar, c_pixel, id_serie = tarea
+    args, c_seinterpolo, id_serie = tarea
 
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}
@@ -141,7 +172,8 @@ def _interpoladorSerie(tarea):
     WHERE {4} = '{5}'
     ORDER BY fecha
     """.format(
-        c_ainterpolar, c_qflag, esquema, tabla, c_pixel, id_serie)
+        args.c_ainterpolar, args.c_qflag, args.esquema, args.tabla,
+        args.c_pixel, id_serie)
 
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     dbCurs.execute(sql)
@@ -158,7 +190,7 @@ def _interpoladorSerie(tarea):
         y = buenos[:, 1].astype(float)  # y -> c_ainterpolar
         f = it.interp1d(x, y,
                         copy=False,
-                        assume_sorted=True
+                        assume_sorted=True  # Lo hice en postgres ya
                         )
 
         malos = lista[lista[:, 2] == True]  # Solo pixeles malos
@@ -176,11 +208,13 @@ def _interpoladorSerie(tarea):
 
             sql = """
             UPDATE {0}.{1}
-            SET {2} = {3}
+            SET {2} = {3}, {4} = TRUE
             WHERE {4} = '{5}'
             AND fecha = to_timestamp({6})::date+1
-            """.format(esquema, tabla, c_ainterpolar, str(interpolado),
-                       c_pixel, id_serie, m[0])
+            """.format(args.esquema, args.tabla,
+                       args.c_ainterpolar, str(interpolado), c_seinterpolo,
+                       args.c_pixel, id_serie,
+                       m[0])
 
             try:
                 logger.debug("Ejecutando SQL: %s" % sql.rstrip())
@@ -188,6 +222,34 @@ def _interpoladorSerie(tarea):
             except Exception as e:
                 logger.error("Error: %s" % e.pgerror)
             # conn.commit()
+
+
+def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
+    sql = """
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{0}'
+    AND table_name = '{1}'
+    AND column_name = '{2}' """.format(esquema, tabla, columna)
+    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    cursor.execute(sql)
+
+    if cursor.fetchone() is None:
+        sql = "ALTER TABLE {0}.{1} add column {2} {3}".format(
+            esquema, tabla, columna, tipo)
+        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+        cursor.execute(sql)
+        logger.info('%s.%s: Se creó la columna %s (%s)' %
+                    (esquema, tabla, columna, tipo))
+
+        if indexar:
+            sql = "CREATE INDEX ON {0}.{1} ({2})".format(
+                esquema, tabla, c_qflag)
+            logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+            cursor.execute(sql)
+            logger.info('%s.%s.%s: Se indexó' % (esquema, tabla, columna))
+
+    else:
+        logger.warn("%s.%s.%s: Ya existe")
 
 
 def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
@@ -201,36 +263,7 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     -------------
 
     """
-
-    c_original = "%s_original" % c_afiltrar
-    # SECUENCIA DE PASOS NECESARIA PARA GENERAR UNA SERIE FILTRADA,
-    # HAY QUE PASARLO A CODIGO PYTHON ASI LO INTEGRO AL PROGRAMA
-    # Cosas que hay que correr para preparar la tabla para interpolarla
-    # agrego la columna de flag de calidad y se pone malo donde el filtro
-    # detecta un mal valor
-    # alter table <tabla> add column q_flag varchar;
-
-    sql = """
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{0}'
-    AND table_name = '{1}'
-    AND column_name = '{2}' """.format(esquema, tabla, c_qflag)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-    cursor.execute(sql)
-
-    if cursor.fetchone() is None:
-        sql = "ALTER TABLE {0}.{1} add column {2} boolean".format(
-            esquema, tabla, c_qflag)
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-        cursor.execute(sql)
-
-        sql = "CREATE INDEX ON {0}.{1} ({2})".format(
-            esquema, tabla, c_qflag)
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-        cursor.execute(sql)
-
-        logger.info('%s.%s: Se creo la columna (indice) de flag de calidad (%s)'
-                    % (esquema, tabla, c_qflag))
+    crearColumna(cursor, esquema, tabla, c_qflag, "boolean", indexar=True)
 
     # criterios de calidad revisar la documentacion del documento VAR_SAT,
     # consultar Camilo Bagnato
@@ -246,7 +279,6 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
      OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-
     logger.info('(%s = TRUE) para los pixeles malos' % c_qflag)
 
     sql = """
@@ -255,42 +287,4 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE NOT {2}""".format(esquema, tabla, c_qflag)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-
     logger.info('(%s = FALSE) para los pixeles buenos' % c_qflag)
-
-    # crear una columna iv_filtrado
-    # alter table <tabla> add column evi_filtrado float;_flag_calidad
-    sql = """
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{0}'
-    AND table_name = '{1}'
-    AND column_name = '{2}' """.format(esquema, tabla, c_original)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-    cursor.execute(sql)
-
-    if cursor.fetchone() is None:
-        sql = "ALTER TABLE {0}.{1} ADD COLUMN {2} float".format(
-            esquema, tabla, c_original)
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-        cursor.execute(sql)
-        print('Se creo la columna de indice original')
-
-    # Me copio a la columna nueva el valor original de cada registro
-    # Siempre y cuando no lo haya hecho antes!
-    sql = """
-    UPDATE {0}.{1}
-    SET {2} = {3}
-    WHERE {4}
-    AND {2} IS NULL
-    """.format(
-        esquema, tabla, c_original, c_afiltrar, c_qflag)
-
-    try:
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-        cursor.execute(sql)
-        logger.info('%s.%s: Se copio %s a %s cuando la calidad es mala')
-    except Exception as e:
-        print(sql)
-        print(e.pgerror)
-
-    return c_original, c_qflag

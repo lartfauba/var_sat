@@ -1,12 +1,26 @@
-
 # Script de Filtrado/Interpolado
 
-## TODO
+## Descripción del Algoritmo
 
-* Documentar el uso
-* Incluir la variable de base de datos en el script de plsh
-* Utilizar un archivo de configuración para el usuario/clave del script de python
-* Usar un threading.manager para monitorear el progreso
+El algoritmo se divide en dos pasos: filtrado y luego interpolado.
+
+### Filtrado
+
+1. Se crean las columnas `qmalo` (indexada) y `x_original`. (donde `x` es la columna a filtrar/interpolar.)
+2. Se detectan los pixeles con mala calidad comparando la columna `q` (parametrizable).
+3. Se marca como `True` la columna `qmalo` en los pixeles con mala calidad, y `False` en caso contrario.
+
+### Interpolado
+
+Por cada serie distinta (Identificada por `id_pixel`):
+
+1. Se copia el valor de `x` a la columna `x_original` en los pixeles malos.
+2. Se crea una columna `x_seinterpolo` para marcar los datos interpolados.
+3. Se obtiene la serie completa de la base.
+4. Con los pixeles buenos, se genera una funcion de interpolado (ver [scipy.interpolate.interp1d](https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.interpolate.interp1d.html))
+5. Se itera por los pixeles malos, intentando interpolar su valor con la función creada, si falla, deja el valor original.
+
+> Importante: Los pixeles malos cuyo valor no pueda interpolarse quedan con el valor original y la columna `x_seinterpolo` como `False` para poder darle otro tratamiento.
 
 ## Instalación del script de Filtrado/Interpolado
 
@@ -18,6 +32,9 @@ apt-get install python-psycopg2 python-scipy
 ```
 
 #### Extensión de PostgreSQL
+
+Para poder ejecutar el script desde postgres, hace falta instalar una extensión.
+
 ```bash
 apt-get install postgresql-9.5-plsh
 ```
@@ -66,5 +83,18 @@ $$;
 ```
 
 ## Uso del script de FI dentro de Postgres
+
+
+## TODO
+
+- [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
+- [ ] Mejorar la documentación
+- [ ] Cambiar la instalación para utilizar un clon del repositorio (Simplifica las actualizaciones)
+- [ ] Incluir la variable de base de datos en el script de plsh (Es necesario o se crea en la db la función?)
+- [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
+- [x] Optimizar el algoritmo: Usar una columna booleana e indexada para filtrar
+- [x] Optimizar el algoritmo: Copiar los datos se los pixeles malos (Son menos...)
+- [x] Interpolar series en paralelo
+- [ ] Usar un threading.manager para monitorear el progreso
 
 

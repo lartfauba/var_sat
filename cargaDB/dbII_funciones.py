@@ -139,8 +139,8 @@ def listarInventario():
 
 
 def compruebaInventario():
-    conexion, cursor = conexionBaseDatos("var_sat_new", "postgres", "postgres", "10.1.18.24")
-    #conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+    #conexion, cursor = conexionBaseDatos("var_sat_new", "postgres", "postgres", "10.1.18.24")
+    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
    
     cursor.execute("SELECT distinct(tabla_destino) FROM rasters.inventario")
     tablas = [t[0] for t in cursor.fetchall()]
