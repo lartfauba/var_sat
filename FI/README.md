@@ -47,18 +47,31 @@ apt-get install postgresql-9.5-plsh
 
 ### Instalación
 
-#### Descargar los scripts del repositorio
+Para permitirnos descargar los archivos como `root` pero que los utilice el usuario `postgres`:
+```bash
+cd /var/lib/postgres
+chmod g+s
+umask 002
+```
 
-Clonar la capeta FI en /var/log/FI
+Luego descargamos el repositorio (todavía en el home de postgres).
+```bash
+git clone https://github.com/lartfauba/var_sat
+```
 
-Aplicar los permisos para el usuario postgres
+Generamos un ambiente para no tener problemas con las versiones de las python y sus modulos.
+```
+cd var_sat/FI
 
-#### Crear una carpeta para los logs
+```
 
+
+También creamos una carpeta para los logs.
 ```bash
 mkdir /var/log/FI
 chown postgres. /var/log/FI
 ```
+
 ### Configuración
 
 Nos conectamos a la base donde precisamos la función.
@@ -94,9 +107,10 @@ Se recomienda que la columna `id_pixel` este indexada.
 
 ## TODO
 
+- [x] Pasar a Python3
 - [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
 - [ ] Mejorar la documentación
-- [ ] Cambiar la instalación para utilizar un clon del repositorio (Simplifica las actualizaciones)
+- [ ] Cambiar la instalación para utilizar un clon del repositorio y un `virtualenv` (Simplifica las actualizaciones)
 - [ ] Incluir la variable de base de datos en el script de plsh (Es necesario o se crea en la db la función?)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
 - [x] Optimizar el algoritmo: Usar una columna booleana e indexada para filtrar
