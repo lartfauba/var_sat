@@ -111,7 +111,8 @@ def interpoladorSerie(cursor, args, pixeles):
     try:
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
-        logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala')
+        logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala' %
+                    (args.esquema, args.tabla, args.c_afiltrar, c_original))
     except Exception as e:
         logger.error("Error: %s" % e.pgerror)
 
