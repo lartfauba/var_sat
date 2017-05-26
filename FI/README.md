@@ -94,11 +94,12 @@ Para finalizar creamos la función en cuestión.
 CREATE FUNCTION FiltrareInterpolar (esquema text, tabla text, c_afiltrar text) RETURNS text
 LANGUAGE plsh AS $$
 #!/bin/sh
-log=/var/log/FI/FI_$1_$2_$3_$(date +%s).log
+log_folder=/var/log/FI
+timelog=$log_folder/timelog.csv  # Estadisticas de ejecuciones
 cd /var/lib/postgresql/var_sat/FI
 . venv/bin/activate  # No hay source en sh
-./FI_main.py --esquema $1 --tabla $2 --c_afiltrar $3 > $log
-echo "Se guardo el log del filtrado/interpolado en $log"
+log_file=$(time --format="%E,%K,%P,%C" --append --output=$timelog ./FI_main.py --esquema $1 --tabla $2 --c_afiltrar $3)
+echo "Se guardo el log del filtrado/interpolado en $log_file"
 $$;
 ```
 
@@ -127,6 +128,7 @@ SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar');
 - [x] Optimizar el algoritmo: Copiar los datos se los pixeles malos (Son menos...)
 - [x] Interpolar series en paralelo
 - [ ] Agregar parametro para el nivel de logging
+- [x] Guardar un log de las corridas y tu walltime (Estadisticas de ejecuciones)
 - [ ] Excluir las series perfectas (sin pixeles malos)
 - [ ] Usar un threading.manager para monitorear el progreso
 

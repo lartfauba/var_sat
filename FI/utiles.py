@@ -25,13 +25,7 @@ def obtenerLogger(output, nombre='FI'):
         fh = FileHandler(output)
         fh.setLevel(INFO)
         fh.setFormatter(formato)
-
-        ch = StreamHandler()
-        ch.setLevel(WARN)
-        ch.setFormatter(formato)
-
         logger.addHandler(fh)
-        logger.addHandler(ch)
 
     loggers.update(dict(nombre=logger))
 

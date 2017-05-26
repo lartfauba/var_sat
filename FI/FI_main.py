@@ -15,6 +15,8 @@ import utiles
 from argparse import ArgumentParser
 from multiprocessing import cpu_count
 
+from datetime import datetime
+
 # from sys import exit
 
 parser = ArgumentParser()
@@ -28,6 +30,7 @@ parser.add_argument("--c_pixel", default='id_pixel')
 parser.add_argument("--c_qflag", default='q_malo')
 parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)
+parser.add_argument("--logfolder", default='/var/log/FI')
 
 # Parmetros del script
 parser.add_argument("--workers", type=int, default=cpu_count(),
@@ -35,7 +38,13 @@ parser.add_argument("--workers", type=int, default=cpu_count(),
                     Por defecto es el número de procesadores disponibles.""")
 
 args = parser.parse_args()
-logger = utiles.obtenerLogger('/tmp/FI.log')
+
+log_file = '%s/FI-%s-%s.%s.%s.log' % (
+    args.logfolder, datetime.now().strftime('%Y%m%d%H%M%S'),
+    args.esquema, args.tabla, args.c_afiltrar)
+
+print(log_file)  # Lo "imprimo" para que lo vea plsh
+logger = utiles.obtenerLogger(log_file)
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
 FI_funciones.logger = logger
