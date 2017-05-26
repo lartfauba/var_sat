@@ -116,20 +116,25 @@ $$;
 SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar'); 
 ```
 
+
 ## TODO
 
-- [x] Pasar a Python3
+### Fixes
+
+- [ ] No andan los logs...
+- [x] Mejorar la documentación
 - [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
-- [ ] Mejorar la documentación
-- [ ] Cambiar la instalación para utilizar un clon del repositorio y un `virtualenv` (Simplifica las actualizaciones)
 - [ ] Incluir la variable de base de datos en el script de plsh (Esta en el environment como PGDATABASE)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
+- [ ] Excluir las series perfectas (sin pixeles malos)
+
+### Features
+
+- [x] Pasar a Python3
+- [x] Cambiar la instalación para utilizar un clon del repositorio y un `virtualenv` (Simplifica las actualizaciones)
 - [x] Optimizar el algoritmo: Usar una columna booleana e indexada para filtrar
 - [x] Optimizar el algoritmo: Copiar los datos se los pixeles malos (Son menos...)
 - [x] Interpolar series en paralelo
 - [ ] Agregar parametro para el nivel de logging
 - [x] Guardar un log de las corridas y tu walltime (Estadisticas de ejecuciones)
-- [ ] Excluir las series perfectas (sin pixeles malos)
 - [ ] Usar un threading.manager para monitorear el progreso
-
-
