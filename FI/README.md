@@ -32,17 +32,9 @@ Por cada serie distinta (Identificada por `id_pixel`):
 
 ### Requerimientos
 
-#### Librerías de Python
 ```bash
-apt-get install python-psycopg2 python-scipy
-```
-
-#### Extensión de PostgreSQL
-
-Para poder ejecutar el script desde postgres, hace falta instalar una extensión.
-
-```bash
-apt-get install postgresql-9.5-plsh
+apt-get install postgresql-9.5-plsh  # Para ejecutar sh desde postgres
+apt-get install python3 python3-pip  # Para ejecutar el script de python 
 ```
 
 ### Instalación
