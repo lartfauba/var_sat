@@ -14,7 +14,7 @@ def obtenerLogger(output, nombre='FI'):
         return loggers.get(nombre)
 
     logger = getLogger('FI')
-    logger.setLevel(INFO)
+    logger.setLevel(WARN)
 
     formato = Formatter(
         "%(asctime)s | %(process)d | %(levelname)s | %(module)s | %(funcName)s | %(message)s",
@@ -23,11 +23,11 @@ def obtenerLogger(output, nombre='FI'):
     # https://stackoverflow.com/questions/6333916/python-logging-ensure-a-handler-is-added-only-once
     if not len(logger.handlers):
         fh = FileHandler(output)
-        fh.setLevel(DEBUG)
+        fh.setLevel(INFO)
         fh.setFormatter(formato)
 
         ch = StreamHandler()
-        ch.setLevel(INFO)
+        ch.setLevel(WARN)
         ch.setFormatter(formato)
 
         logger.addHandler(fh)
