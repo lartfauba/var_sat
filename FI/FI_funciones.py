@@ -115,7 +115,7 @@ def interpoladorSerie(cursor, args, pixeles):
     except Exception as e:
         logger.error("Error: %s" % e.pgerror)
 
-    c_seinterpolo = "%s_seinterpolo" % args._c_afiltrar
+    c_seinterpolo = "%s_seinterpolo" % args.c_afiltrar
     crearColumna(cursor, args.esquema, args.tabla, c_seinterpolo, "boolean")
 
     sql = """
