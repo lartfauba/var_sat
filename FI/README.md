@@ -62,9 +62,8 @@ git clone https://github.com/lartfauba/var_sat
 Generamos un ambiente para no tener problemas con las versiones de las python y sus modulos.
 ```
 cd var_sat/FI
-
+pip install --requirement requirements.txt
 ```
-
 
 También creamos una carpeta para los logs.
 ```bash
@@ -85,7 +84,7 @@ Y desde la consola de SQL, primero activamos la extensión plsh
 CREATE EXTENSION plsh;
 ```
 
-Luego eliminamos la función, por precaución en caso de que exista
+Luego eliminamos la función, por precaución en caso de que ya exista
 ```sql
 DROP FUNCTION FiltrareInterpolar (esquema text, tabla text, c_afiltrar text);
 ```
@@ -96,14 +95,25 @@ CREATE FUNCTION FiltrareInterpolar (esquema text, tabla text, c_afiltrar text) R
 LANGUAGE plsh AS $$
 #!/bin/sh
 log=/var/log/FI/FI_$1_$2_$3_$(date +%s).log
-python /var/lib/postgresql/FI/FI_main.py --esquema $1 --tabla $2 --c_afiltrar $3 > $log
+cd /var/lib/postgresql/var_sat/FI
+. venv/bin/activate  # No hay source en sh
+./FI_main.py --esquema $1 --tabla $2 --c_afiltrar $3 > $log
 echo "Se guardo el log del filtrado/interpolado en $log"
 $$;
 ```
 
 ## Uso del script de FI dentro de Postgres
 
-Se recomienda que la columna `id_pixel` este indexada.
+### Preparación
+
+1. Se recomienda que la columna `id_pixel` este indexada.
+2. 
+
+### Ejecución del Filtrado/Interpolado
+
+```sql
+SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar'); 
+```
 
 ## TODO
 
@@ -111,11 +121,13 @@ Se recomienda que la columna `id_pixel` este indexada.
 - [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
 - [ ] Mejorar la documentación
 - [ ] Cambiar la instalación para utilizar un clon del repositorio y un `virtualenv` (Simplifica las actualizaciones)
-- [ ] Incluir la variable de base de datos en el script de plsh (Es necesario o se crea en la db la función?)
+- [ ] Incluir la variable de base de datos en el script de plsh (Esta en el environment como PGDATABASE)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
 - [x] Optimizar el algoritmo: Usar una columna booleana e indexada para filtrar
 - [x] Optimizar el algoritmo: Copiar los datos se los pixeles malos (Son menos...)
 - [x] Interpolar series en paralelo
+- [ ] Agregar parametro para el nivel de logging
+- [ ] Excluir las series perfectas (sin pixeles malos)
 - [ ] Usar un threading.manager para monitorear el progreso
 
 

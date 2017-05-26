@@ -85,7 +85,7 @@ def seriesInterpolar(cursor, args):
     sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
         args.c_pixel, args.esquema, args.tabla, args.c_qflag)
 
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
     pixels_a_interpolar = cursor.fetchall()
     return pixels_a_interpolar
@@ -109,10 +109,10 @@ def interpoladorSerie(cursor, args, pixeles):
         args.esquema, args.tabla, c_original, args.c_afiltrar, args.c_qflag)
 
     try:
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+        # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
-        logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala' %
-                    (args.esquema, args.tabla, args.c_afiltrar, c_original))
+        logger.debug('%s.%s.%s: Se copio a %s cuando la calidad es mala' %
+                     (args.esquema, args.tabla, args.c_afiltrar, c_original))
     except Exception as e:
         logger.error("Error: %s" % e.pgerror)
 
@@ -123,7 +123,7 @@ def interpoladorSerie(cursor, args, pixeles):
     UPDATE {0}.{1}
     SET {2} = FALSE
     """.format(args.esquema, args.tabla, c_seinterpolo)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
     # logger.info('%s.%s.%s: Se copio a %s cuando la calidad es mala')
 
@@ -140,9 +140,9 @@ def interpoladorSerie(cursor, args, pixeles):
     cola.map_async(_interpoladorSerie, tareas)
     # cola.map_async(fPrueba, argumentos)
     cola.close()
-    logger.info("Esperando a que las tareas terminen")
+    logger.debug("Esperando a que las tareas terminen")
     cola.join()
-    logger.info("Terminaron todas las tareas")
+    logger.debug("Terminaron todas las tareas")
 
 
 def _interpoladorSerie(tarea):
@@ -169,14 +169,14 @@ def _interpoladorSerie(tarea):
         args.c_afiltrar, args.c_qflag, args.esquema, args.tabla,
         args.c_pixel, id_serie)
 
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     dbCurs.execute(sql)
     serie_focal = dbCurs.fetchall()
 
     lista = np.array(serie_focal)
     buenos = lista[lista[:, 2] != True]  # Solo pixeles buenos
 
-    logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
+    logger.debug("La serie de id_pixel = %d tiene %d pixeles buenos" %
                  (id_serie, len(buenos)))
 
     if len(buenos) > 2:
@@ -188,8 +188,8 @@ def _interpoladorSerie(tarea):
                         )
 
         malos = lista[lista[:, 2] == True]  # Solo pixeles malos
-        logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
-                    (id_serie, len(malos)))
+        logger.debug("La serie de id_pixel = %d tiene %d pixeles malos" %
+                     (id_serie, len(malos)))
 
         for m in malos:
             try:
@@ -211,7 +211,7 @@ def _interpoladorSerie(tarea):
                        m[0])
 
             try:
-                logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+                # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
                 dbCurs.execute(sql)
             except Exception as e:
                 logger.error("Error: %s" % e.pgerror)
@@ -224,26 +224,26 @@ def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
     WHERE table_schema = '{0}'
     AND table_name = '{1}'
     AND column_name = '{2}' """.format(esquema, tabla, columna)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
 
     if cursor.fetchone() is None:
         sql = "ALTER TABLE {0}.{1} add column {2} {3}".format(
             esquema, tabla, columna, tipo)
-        logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+        # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
         cursor.execute(sql)
-        logger.info('%s.%s: Se creó la columna %s (%s)' %
-                    (esquema, tabla, columna, tipo))
+        logger.debug('%s.%s: Se creó la columna %s (%s)' %
+                     (esquema, tabla, columna, tipo))
 
         if indexar:
             sql = "CREATE INDEX ON {0}.{1} ({2})".format(
                 args.esquema, args.tabla, args.c_qflag)
             logger.debug("Ejecutando SQL: %s" % sql.rstrip())
             cursor.execute(sql)
-            logger.info('%s.%s.%s: Se indexó' % (esquema, tabla, columna))
+            logger.debug('%s.%s.%s: Se indexó' % (esquema, tabla, columna))
 
     else:
-        logger.warn("%s.%s.%s: Ya existe" % (esquema, tabla, columna))
+        logger.info("%s.%s.%s: Ya existe" % (esquema, tabla, columna))
 
 
 def filtradoIndice(cursor, args):
@@ -273,15 +273,15 @@ def filtradoIndice(cursor, args):
     OR {3}::int & 1024 = 1024
     OR {3}::int & 192 != 64
     """.format(args.esquema, args.tabla, args.c_qflag, args.c_calidad)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('Se definio %s = TRUE para los pixeles malos' % args.c_qflag)
+    logger.debug('Se definio %s = TRUE para los pixeles malos' % args.c_qflag)
 
     sql = """
     UPDATE {0}.{1}
     SET {2} = FALSE
     WHERE {2} IS NOT TRUE
     """.format(args.esquema, args.tabla, args.c_qflag)
-    logger.debug("Ejecutando SQL: %s" % sql.rstrip())
+    # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('Se definio %s = FALSE para los pixeles buenos' % args.c_qflag)
+    logger.debug('Se definio %s = FALSE para los pixeles buenos' % args.c_qflag)
