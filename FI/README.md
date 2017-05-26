@@ -119,6 +119,7 @@ SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar');
 - [ ] Incluir la variable de base de datos en el script de plsh (Esta en el environment como PGDATABASE)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
 - [ ] Excluir las series perfectas (sin pixeles malos)
+- [ ] Compararlo con la version anterior para saber cuanto ganamos
 
 ### Features
 
