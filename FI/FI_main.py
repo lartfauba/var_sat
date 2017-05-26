@@ -55,7 +55,7 @@ logger.info("Obteniendo IDs de series a interpolar")
 series = FI_funciones.seriesInterpolar(cur, args)
 
 logger.info("Interpolando %d series" % len(series))
-pixeles = [i[0] for i in series]  # Me quedo con el id solamente
+series = [i[0] for i in series]  # Me quedo con el id solamente
 FI_funciones.interpoladorSerie(cur, args, series)
 
 conn.close()

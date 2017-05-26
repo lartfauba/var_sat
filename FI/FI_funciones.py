@@ -246,7 +246,7 @@ def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
             logger.info('%s.%s.%s: Se indexó' % (esquema, tabla, columna))
 
     else:
-        logger.warn("%s.%s.%s: Ya existe")
+        logger.warn("%s.%s.%s: Ya existe" % (esquema, tabla, columna))
 
 
 def filtradoIndice(cursor, args):

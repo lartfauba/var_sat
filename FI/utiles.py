@@ -9,8 +9,8 @@ def obtenerLogger(output):
     logger.setLevel(DEBUG)
 
     formato = Formatter(
-        '%(asctime)s | %(process)d | %(levelno)s | %(module)s | %(funcName)s | %(message)s',
-                        "%Y-%m-%d %H:%M:%S")
+        "%(asctime)s | %(process)d | %(levelname)s | %(module)s | %(funcName)s | %(message)s",
+        "%Y-%m-%d %H:%M:%S")
 
     fh = FileHandler(output)
     fh.setLevel(DEBUG)
