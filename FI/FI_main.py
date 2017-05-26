@@ -25,6 +25,7 @@ parser.add_argument("--base", default='var_sat_new')
 parser.add_argument("--esquema", required=True)
 parser.add_argument("--tabla", required=True)
 parser.add_argument("--c_pixel", default='id_pixel')
+parser.add_argument("--c_qflag", default='q_malo')
 parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)
 
@@ -39,8 +40,6 @@ logger = utiles.obtenerLogger('/tmp/FI.log')
 # TODO: Debe haber un modo mas elegante de hacerlo...
 FI_funciones.logger = logger
 FI_funciones.args = args
-c_qflag = FI_funciones.c_qflag  # TODO: Pasar a un argumento
-
 
 logger.debug("Conectando a la base")
 conn, cur = FI_funciones.conexionBaseDatos(
@@ -49,17 +48,14 @@ conn, cur = FI_funciones.conexionBaseDatos(
 FI_funciones.dbConn = conn
 FI_funciones.dbCurs = cur
 
-
 logger.info("Filtrando")
-FI_funciones.filtradoIndice(
-    cur, args.esquema, args.tabla, args.c_afiltrar, args.c_calidad)
+FI_funciones.filtradoIndice(cur, args)
 
 logger.info("Obteniendo IDs de series a interpolar")
-series = FI_funciones.seriesInterpolar(
-    cur, args.esquema, args.tabla, args.c_pixel)
+series = FI_funciones.seriesInterpolar(cur, args)
 
 logger.info("Interpolando %d series" % len(series))
 pixeles = [i[0] for i in series]  # Me quedo con el id solamente
-FI_funciones.interpoladorSerie(args, series, args.c_afiltrar, args.workers)
+FI_funciones.interpoladorSerie(cursor, args, series)
 
 conn.close()

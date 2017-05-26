@@ -25,9 +25,6 @@ logger = None
 dbConn = None
 dbCurrs = None
 
-# El nombre de la columna booleana
-c_qflag = 'q_malo'
-
 
 # https://stackoverflow.com/questions/20640840/how-to-efficiently-have-multiproccessing-process-read-immutable-big-data
 def worker_init(args):
@@ -67,7 +64,7 @@ def conexionBaseDatos(database, user, password, host):
     return conn, cursor
 
 
-def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
+def seriesInterpolar(cursor, args):
     """
     Dada una tabla genera una lista de id_pixels que necesitan interpolacion
     (sin repetir)
@@ -86,7 +83,7 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     """
 
     sql = "SELECT DISTINCT {0} FROM {1}.{2} WHERE {3}".format(
-        c_pixel, esquema, tabla, c_qflag)
+        args.c_pixel, args.esquema, args.tabla, args.c_qflag)
 
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
@@ -109,7 +106,7 @@ def interpoladorSerie(cursor, args, pixeles):
     WHERE {4}
     AND {2} IS NULL
     """.format(
-        args.esquema, args.tabla, c_original, args.c_afiltrar, c_qflag)
+        args.esquema, args.tabla, c_original, args.c_afiltrar, args.c_qflag)
 
     try:
         logger.debug("Ejecutando SQL: %s" % sql.rstrip())
@@ -243,7 +240,7 @@ def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
 
         if indexar:
             sql = "CREATE INDEX ON {0}.{1} ({2})".format(
-                esquema, tabla, c_qflag)
+                args.esquema, args.tabla, args.c_qflag)
             logger.debug("Ejecutando SQL: %s" % sql.rstrip())
             cursor.execute(sql)
             logger.info('%s.%s.%s: Se indexó' % (esquema, tabla, columna))
@@ -252,7 +249,7 @@ def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
         logger.warn("%s.%s.%s: Ya existe")
 
 
-def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
+def filtradoIndice(cursor, args):
     """
     Filtra la tabla que se le pasa como argumento y le agrega las columnas
 
@@ -263,7 +260,8 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     -------------
 
     """
-    crearColumna(cursor, esquema, tabla, c_qflag, "boolean", indexar=True)
+    crearColumna(cursor, args.esquema, args.tabla, args.c_qflag,
+                 "boolean", indexar=True)
 
     # criterios de calidad revisar la documentacion del documento VAR_SAT,
     # consultar Camilo Bagnato
@@ -276,15 +274,17 @@ def filtradoIndice(cursor, esquema, tabla, c_afiltrar, c_calidad):
     WHERE {3}::int & 32768 = 32768
     OR {3}::int & 16384 = 16384
     OR {3}::int & 1024 = 1024
-     OR {3}::int & 192 != 64 """.format(esquema, tabla, c_qflag, c_calidad)
+    OR {3}::int & 192 != 64
+    """.format(args.esquema, args.tabla, args.c_qflag, args.c_calidad)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('(%s = TRUE) para los pixeles malos' % c_qflag)
+    logger.info('(%s = TRUE) para los pixeles malos' % args.c_qflag)
 
     sql = """
     UPDATE {0}.{1}
     SET {2} = FALSE
-    WHERE NOT {2}""".format(esquema, tabla, c_qflag)
+    WHERE NOT {2}
+    """.format(args.esquema, args.tabla, args.c_qflag)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('(%s = FALSE) para los pixeles buenos' % c_qflag)
+    logger.info('(%s = FALSE) para los pixeles buenos' % args.c_qflag)
