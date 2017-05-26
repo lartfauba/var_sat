@@ -23,8 +23,8 @@ Por cada serie distinta (Identificada por `id_pixel`):
     1. Se obtiene la serie completa de la base.
     2. Con los pixeles buenos, se genera una funcion de interpolado (ver [scipy.interpolate.interp1d](https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.interpolate.interp1d.html))
     3. Se itera por los pixeles malos, intentando interpolar su valor con la función creada.
-				* Si falla, deja el valor original.
-				* Si se logra, se reemplaza el valor en `x` y se marca como `TRUE` la columna `x_seinterpolo`.
+        - Si falla, deja el valor original.
+        - Si se logra, se reemplaza el valor en `x` y se marca como `TRUE` la columna `x_seinterpolo`.
 
 > Importante: Los pixeles malos cuyo valor no pueda interpolarse quedan con el valor original y la columna `x_seinterpolo` como `False` para poder darle otro tratamiento.
 
@@ -90,6 +90,7 @@ $$;
 
 ## Uso del script de FI dentro de Postgres
 
+Se recomienda que la columna `id_pixel` este indexada.
 
 ## TODO
 
