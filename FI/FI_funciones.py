@@ -94,12 +94,12 @@ def seriesInterpolar(cursor, esquema, tabla, c_pixel, c_qflag):
     return pixels_a_interpolar
 
 
-def interpoladorSerie(args, pixeles, c_filtrado, workers=1):
-    logger.info("Preparandose para interpolar %d pixeles con %d workers" %
-                (len(pixeles), workers))
+def interpoladorSerie(args, pixeles, c_ainterpolar, workers=1):
+    logger.info("Preparandose para interpolar %s (%d series) con %d workers" %
+                (c_ainterpolar, len(pixeles), workers))
 
-    argumentos = [(args.esquema, args.tabla,
-                   c_filtrado, args.c_pixel, i) for i in pixeles]
+    tareas = [(args.esquema, args.tabla,
+               c_ainterpolar, args.c_pixel, i) for i in pixeles]
 
     if workers > 1:  # PROCESAMIENTO EN PARALELO
         logger.debug("Iniciando Pool")
@@ -109,7 +109,7 @@ def interpoladorSerie(args, pixeles, c_filtrado, workers=1):
             initargs=(args,)  # Cada worker va a levantar su propia conexion
         )
         logger.debug("Cargando tareas")
-        cola.map_async(_interpoladorSerie, argumentos)
+        cola.map_async(_interpoladorSerie, tareas)
         # cola.map_async(fPrueba, argumentos)
         cola.close()
         logger.info("Esperando a que las tareas terminen")
@@ -117,10 +117,10 @@ def interpoladorSerie(args, pixeles, c_filtrado, workers=1):
         logger.info("Terminaron todas las tareas")
 
     else:  # PROCESAMIENTO SECUENCIAL:
-        map(_interpoladorSerie, argumentos)
+        map(_interpoladorSerie, tareas)
 
 
-def _interpoladorSerie(argumentos):
+def _interpoladorSerie(tarea):
     """
     Dado un id de pixel genera las interpolaciones necesarias para completar
     la serie de datos y realiza los update de los datos en los lugares
@@ -133,7 +133,7 @@ def _interpoladorSerie(argumentos):
     ----------
 
     """
-    esquema, tabla, c_ainterpolar, c_pixel, id_serie = argumentos
+    esquema, tabla, c_ainterpolar, c_pixel, id_serie = tarea
 
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}

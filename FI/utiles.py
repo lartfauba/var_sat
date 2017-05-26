@@ -3,11 +3,13 @@
 from logging import getLogger, Formatter, FileHandler, StreamHandler
 from logging import INFO, DEBUG, ERROR, WARN
 
+
 def obtenerLogger(output):
     logger = getLogger('FI')
     logger.setLevel(DEBUG)
 
-    formato = Formatter('%(asctime)s\t%(levelname)s\t%(module)s\t%(funcName)s\t%(message)s',
+    formato = Formatter(
+        '%(asctime)s | %(process)d | %(levelno)s | %(module)s | %(funcName)s | %(message)s',
                         "%Y-%m-%d %H:%M:%S")
 
     fh = FileHandler(output)
