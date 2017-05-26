@@ -6,7 +6,7 @@ El algoritmo se divide en dos pasos: filtrado y luego interpolado.
 
 ### Filtrado
 
-1. Se crean las columnas `qmalo` (indexada) y `x_original`. (donde `x` es la columna a filtrar/interpolar.)
+1. Se crea las columnas `qmalo` (indexada)
 2. Se detectan los pixeles con mala calidad comparando la columna `q` (parametrizable).
 3. Se marca como `True` la columna `qmalo` en los pixeles con mala calidad, y `False` en caso contrario.
 
@@ -14,11 +14,17 @@ El algoritmo se divide en dos pasos: filtrado y luego interpolado.
 
 Por cada serie distinta (Identificada por `id_pixel`):
 
-1. Se copia el valor de `x` a la columna `x_original` en los pixeles malos.
-2. Se crea una columna `x_seinterpolo` para marcar los datos interpolados.
-3. Se obtiene la serie completa de la base.
-4. Con los pixeles buenos, se genera una funcion de interpolado (ver [scipy.interpolate.interp1d](https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.interpolate.interp1d.html))
-5. Se itera por los pixeles malos, intentando interpolar su valor con la función creada, si falla, deja el valor original.
+1. Preparación
+    1. Se crea la columna `x_original`. (donde `x` es la columna a filtrar/interpolar.)
+    2. Se copia el valor de `x` a la columna `x_original` en los pixeles malos.
+    3. Se crea una columna `x_seinterpolo` para marcar los datos interpolados.
+
+2. Interpolado
+    1. Se obtiene la serie completa de la base.
+    2. Con los pixeles buenos, se genera una funcion de interpolado (ver [scipy.interpolate.interp1d](https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.interpolate.interp1d.html))
+    3. Se itera por los pixeles malos, intentando interpolar su valor con la función creada.
+				* Si falla, deja el valor original.
+				* Si se logra, se reemplaza el valor en `x` y se marca como `TRUE` la columna `x_seinterpolo`.
 
 > Importante: Los pixeles malos cuyo valor no pueda interpolarse quedan con el valor original y la columna `x_seinterpolo` como `False` para poder darle otro tratamiento.
 
