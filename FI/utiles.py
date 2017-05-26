@@ -14,7 +14,6 @@ def obtenerLogger(output, nombre='FI'):
         return loggers.get(nombre)
 
     logger = getLogger('FI')
-    logger.setLevel(WARN)
 
     formato = Formatter(
         "%(asctime)s | %(process)d | %(levelname)s | %(module)s | %(funcName)s | %(message)s",
