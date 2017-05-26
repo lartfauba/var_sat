@@ -162,7 +162,7 @@ def _interpoladorSerie(tarea):
     ----------
 
     """
-    args, id_serie = tarea
+    args, c_seinterpolo, id_serie = tarea
 
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}
@@ -207,8 +207,8 @@ def _interpoladorSerie(tarea):
             sql = """
             UPDATE {0}.{1}
             SET {2} = {3}, {4} = TRUE
-            WHERE {4} = '{5}'
-            AND fecha = to_timestamp({6})::date+1
+            WHERE {5} = '{6}'
+            AND fecha = to_timestamp({7})::date+1
             """.format(args.esquema, args.tabla,
                        args.c_afiltrar, str(interpolado), c_seinterpolo,
                        args.c_pixel, id_serie,
