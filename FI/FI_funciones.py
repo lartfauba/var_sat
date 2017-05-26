@@ -176,7 +176,7 @@ def _interpoladorSerie(tarea):
     lista = np.array(serie_focal)
     buenos = lista[lista[:, 2] != True]  # Solo pixeles buenos
 
-    logger.debug("La serie de id_pixel = %d tiene %d pixeles buenos" %
+    logger.info("La serie de id_pixel = %d tiene %d pixeles buenos" %
                  (id_serie, len(buenos)))
 
     if len(buenos) > 2:

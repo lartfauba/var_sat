@@ -3,10 +3,18 @@
 from logging import getLogger, Formatter, FileHandler, StreamHandler
 from logging import INFO, DEBUG, ERROR, WARN
 
+# https://stackoverflow.com/questions/7173033/duplicate-log-output-when-using-python-logging-module
+loggers = {}
 
-def obtenerLogger(output):
+
+def obtenerLogger(output, nombre='FI'):
+    global loggers
+
+    if loggers.get(nombre):
+        return loggers.get(nombre)
+
     logger = getLogger('FI')
-    logger.setLevel(DEBUG)
+    logger.setLevel(INFO)
 
     formato = Formatter(
         "%(asctime)s | %(process)d | %(levelname)s | %(module)s | %(funcName)s | %(message)s",
@@ -22,5 +30,7 @@ def obtenerLogger(output):
 
     logger.addHandler(fh)
     logger.addHandler(ch)
+
+    loggers.update(dict(nombre=logger))
 
     return logger
