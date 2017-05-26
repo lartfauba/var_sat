@@ -170,7 +170,7 @@ def _interpoladorSerie(tarea):
     WHERE {4} = '{5}'
     ORDER BY fecha
     """.format(
-        args.c_ainterpolar, args.c_qflag, args.esquema, args.tabla,
+        args.c_afiltrar, args.c_qflag, args.esquema, args.tabla,
         args.c_pixel, id_serie)
 
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
@@ -185,7 +185,7 @@ def _interpoladorSerie(tarea):
 
     if len(buenos) > 2:
         x = buenos[:, 0].astype(int)    # x -> fecha
-        y = buenos[:, 1].astype(float)  # y -> c_ainterpolar
+        y = buenos[:, 1].astype(float)  # y -> c_afiltrar
         f = it.interp1d(x, y,
                         copy=False,
                         assume_sorted=True  # Lo hice en postgres ya
@@ -210,7 +210,7 @@ def _interpoladorSerie(tarea):
             WHERE {4} = '{5}'
             AND fecha = to_timestamp({6})::date+1
             """.format(args.esquema, args.tabla,
-                       args.c_ainterpolar, str(interpolado), c_seinterpolo,
+                       args.c_afiltrar, str(interpolado), c_seinterpolo,
                        args.c_pixel, id_serie,
                        m[0])
 
