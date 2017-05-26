@@ -96,7 +96,7 @@ def interpoladorSerie(cursor, args, pixeles):
                 (args.esquema, args.tabla, args.c_afiltrar,
                  len(pixeles), args.workers))
 
-    c_original = "%s_original" % args.c_ainterpolar
+    c_original = "%s_original" % args.c_afiltrar
     crearColumna(cursor, args.esquema, args.tabla, c_original, "float")
     # Siempre float?
 
@@ -115,7 +115,7 @@ def interpoladorSerie(cursor, args, pixeles):
     except Exception as e:
         logger.error("Error: %s" % e.pgerror)
 
-    c_seinterpolo = "%s_seinterpolo" % args._ainterpolar
+    c_seinterpolo = "%s_seinterpolo" % args._afiltrar
     crearColumna(cursor, args.esquema, args.tabla, c_seinterpolo, "boolean")
 
     sql = """
