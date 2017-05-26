@@ -162,7 +162,7 @@ def _interpoladorSerie(tarea):
     ----------
 
     """
-    args, c_seinterpolo, id_serie = tarea
+    args, id_serie = tarea
 
     sql = """
     SELECT extract(epoch from fecha), {0}, {1}
