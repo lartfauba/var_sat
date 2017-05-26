@@ -93,7 +93,7 @@ def seriesInterpolar(cursor, args):
 
 def interpoladorSerie(cursor, args, pixeles):
     logger.info("%s.%s.%s: Interpolando %d series con %d workers" %
-                (args.esquema, args.tabla, args.c_ainterpolar,
+                (args.esquema, args.tabla, args.c_afiltrar,
                  len(pixeles), args.workers))
 
     c_original = "%s_original" % args.c_ainterpolar
