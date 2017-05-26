@@ -130,23 +130,19 @@ def interpoladorSerie(cursor, args, pixeles):
     # TODO: Cambiar args por un dict?
     tareas = [(args, c_seinterpolo, i) for i in pixeles]
 
-    if args.workers > 1:  # PROCESAMIENTO EN PARALELO
-        logger.debug("Iniciando Pool")
-        cola = multiprocessing.Pool(
-            processes=args.workers,
-            initializer=worker_init,
-            initargs=(args,)  # Cada worker va a levantar su propia conexion
-        )
-        logger.debug("Cargando tareas")
-        cola.map_async(_interpoladorSerie, tareas)
-        # cola.map_async(fPrueba, argumentos)
-        cola.close()
-        logger.info("Esperando a que las tareas terminen")
-        cola.join()
-        logger.info("Terminaron todas las tareas")
-
-    else:  # PROCESAMIENTO SECUENCIAL:
-        map(_interpoladorSerie, tareas)
+    logger.debug("Iniciando Pool")
+    cola = multiprocessing.Pool(
+        processes=args.workers,
+        initializer=worker_init,
+        initargs=(args,)  # Cada worker va a levantar su propia conexion
+    )
+    logger.debug("Cargando tareas")
+    cola.map_async(_interpoladorSerie, tareas)
+    # cola.map_async(fPrueba, argumentos)
+    cola.close()
+    logger.info("Esperando a que las tareas terminen")
+    cola.join()
+    logger.info("Terminaron todas las tareas")
 
 
 def _interpoladorSerie(tarea):
@@ -279,13 +275,13 @@ def filtradoIndice(cursor, args):
     """.format(args.esquema, args.tabla, args.c_qflag, args.c_calidad)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('(%s = TRUE) para los pixeles malos' % args.c_qflag)
+    logger.info('Se definio %s = TRUE para los pixeles malos' % args.c_qflag)
 
     sql = """
     UPDATE {0}.{1}
     SET {2} = FALSE
-    WHERE NOT {2}
+    WHERE {2} IS NOT TRUE
     """.format(args.esquema, args.tabla, args.c_qflag)
     logger.debug("Ejecutando SQL: %s" % sql.rstrip())
     cursor.execute(sql)
-    logger.info('(%s = FALSE) para los pixeles buenos' % args.c_qflag)
+    logger.info('Se definio %s = FALSE para los pixeles buenos' % args.c_qflag)
