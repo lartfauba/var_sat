@@ -20,16 +20,18 @@ def obtenerLogger(output, nombre='FI'):
         "%(asctime)s | %(process)d | %(levelname)s | %(module)s | %(funcName)s | %(message)s",
         "%Y-%m-%d %H:%M:%S")
 
-    fh = FileHandler(output)
-    fh.setLevel(DEBUG)
-    fh.setFormatter(formato)
+    # https://stackoverflow.com/questions/6333916/python-logging-ensure-a-handler-is-added-only-once
+    if not len(logger.handlers):
+        fh = FileHandler(output)
+        fh.setLevel(DEBUG)
+        fh.setFormatter(formato)
 
-    ch = StreamHandler()
-    ch.setLevel(INFO)
-    ch.setFormatter(formato)
+        ch = StreamHandler()
+        ch.setLevel(INFO)
+        ch.setFormatter(formato)
 
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+        logger.addHandler(fh)
+        logger.addHandler(ch)
 
     loggers.update(dict(nombre=logger))
 
