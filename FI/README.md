@@ -12,12 +12,12 @@ El algoritmo se divide en dos pasos: filtrado y luego interpolado.
 
 ### Interpolado
 
-Por cada serie distinta (Identificada por `id_pixel`):
-
 1. Preparación
     1. Se crea la columna `x_original`. (donde `x` es la columna a filtrar/interpolar.)
     2. Se copia el valor de `x` a la columna `x_original` en los pixeles malos.
     3. Se crea una columna `x_seinterpolo` para marcar los datos interpolados.
+
+Luego, por cada serie distinta (Identificada por `id_pixel`):
 
 2. Interpolado
     1. Se obtiene la serie completa de la base.
@@ -54,7 +54,10 @@ git clone https://github.com/lartfauba/var_sat
 Generamos un ambiente para no tener problemas con las versiones de las python y sus modulos.
 ```
 cd var_sat/FI
+virtualenv --python=$(which python3) venv
+source venv/bin/activate
 pip install --requirement requirements.txt
+deactivate
 ```
 
 También creamos una carpeta para los logs.
@@ -100,14 +103,12 @@ $$;
 ### Preparación
 
 1. Se recomienda que la columna `id_pixel` este indexada.
-2. 
 
 ### Ejecución del Filtrado/Interpolado
 
 ```sql
 SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar'); 
 ```
-
 
 ## TODO
 
@@ -118,7 +119,7 @@ SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar');
 - [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
 - [ ] Incluir la variable de base de datos en el script de plsh (Esta en el environment como PGDATABASE)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
-- [ ] Excluir las series perfectas (sin pixeles malos)
+- [x] Excluir las series perfectas (sin pixeles malos)
 - [ ] Compararlo con la version anterior para saber cuanto ganamos
 
 ### Features
