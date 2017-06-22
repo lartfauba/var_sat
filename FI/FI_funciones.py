@@ -237,9 +237,13 @@ def crearColumna(cursor, esquema, tabla, columna, tipo, indexar=False):
         sql = "ALTER TABLE {0}.{1} add column {2} {3}".format(
             esquema, tabla, columna, tipo)
         # logger.debug("Ejecutando SQL: %s" % sql.rstrip())
-        cursor.execute(sql)
-        logger.debug('%s.%s: Se creó la columna %s (%s)' %
-                     (esquema, tabla, columna, tipo))
+
+        try:
+            cursor.execute(sql)
+            logger.debug('%s.%s: Se creó la columna %s (%s)' %
+                         (esquema, tabla, columna, tipo))
+        except Exception as e:
+            logger.error("Error: %s" % e.pgerror)
 
         if indexar:
             sql = "CREATE INDEX ON {0}.{1} ({2})".format(
