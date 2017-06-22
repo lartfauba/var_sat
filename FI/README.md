@@ -114,12 +114,16 @@ SELECT FiltrareInterpolar('esquema', 'tabla', 'columna_a_filtrar');
 
 ### Fixes
 
-- [ ] No andan los logs...
+- [x] No andan los logs...
 - [x] Mejorar la documentación
 - [ ] Separar las funciones de la base de datos (conexion, ejecucion de sql, creacion de columnas)
 - [ ] Incluir la variable de base de datos en el script de plsh (Esta en el environment como PGDATABASE)
 - [ ] Utilizar un archivo de configuración para el usuario/clave del script de python (Está hardcodeado)
 - [x] Excluir las series perfectas (sin pixeles malos)
+
+- [ ] qmalos: Realmente hace falta marcar como FALSE los NOT TRUE? En tablas grandes demora muchísimo
+https://stackoverflow.com/questions/512451/how-can-i-add-a-column-to-a-postgresql-database-that-doesnt-allow-nulls
+
 - [ ] Compararlo con la version anterior para saber cuanto ganamos
 
 ### Features

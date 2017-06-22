@@ -35,7 +35,7 @@ dbCurrs = None
 
 # https://stackoverflow.com/questions/20640840/how-to-efficiently-have-multiproccessing-process-read-immutable-big-data
 def worker_init(args):
-    global dbConn, dbCurs
+    global dbConn, dbCurs, logger
     dbConn, dbCurs = conexionBaseDatos(
         args.base, args.usuario, args.clave, args.servidor)
 
@@ -194,7 +194,7 @@ def _interpoladorSerie(tarea):
                         )
 
         malos = lista[lista[:, 2] == True]  # Solo pixeles malos
-        logger.debug("La serie de id_pixel = %d tiene %d pixeles malos" %
+        logger.info("La serie de id_pixel = %d tiene %d pixeles malos" %
                      (id_serie, len(malos)))
 
         for m in malos:
