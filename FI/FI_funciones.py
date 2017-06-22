@@ -11,7 +11,7 @@
 #
 ########################################################################
 
-import utiles
+from logger import Logger
 
 import psycopg2 as pg
 from psycopg2.extras import DictCursor
@@ -19,10 +19,15 @@ from scipy import interpolate as it
 import numpy as np
 import multiprocessing
 
+
 # from IPython import embed  # Debug
 
 args = None
-logger = None
+
+#
+logger_obj = Logger()
+logger = logger_obj.logger
+logger.info('Iniciado')
 
 dbConn = None
 dbCurrs = None
@@ -30,8 +35,7 @@ dbCurrs = None
 
 # https://stackoverflow.com/questions/20640840/how-to-efficiently-have-multiproccessing-process-read-immutable-big-data
 def worker_init(args):
-    global dbConn, dbCurs, logger
-    logger = utiles.obtenerLogger('/tmp/FI.log')
+    global dbConn, dbCurs
     dbConn, dbCurs = conexionBaseDatos(
         args.base, args.usuario, args.clave, args.servidor)
 

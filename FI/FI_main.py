@@ -12,7 +12,7 @@
 ########################################################################
 
 import FI_funciones
-import utiles
+from logger import Logger
 
 from argparse import ArgumentParser
 from multiprocessing import cpu_count
@@ -34,6 +34,11 @@ parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)
 parser.add_argument("--logfolder", default='/var/log/FI')
 
+#
+logger_obj = Logger()
+logger = logger_obj.logger
+logger.info('Iniciado')
+
 # Parmetros del script
 parser.add_argument("--workers", type=int, default=cpu_count(),
                     help="""Número de hilos para realizar la carga de las imágenes.
@@ -46,7 +51,7 @@ log_file = '%s/FI-%s-%s.%s.%s.log' % (
     args.esquema, args.tabla, args.c_afiltrar)
 
 print(log_file)  # Lo "imprimo" para que lo vea plsh
-logger = utiles.obtenerLogger(log_file)
+
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
 FI_funciones.logger = logger
