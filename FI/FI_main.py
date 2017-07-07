@@ -33,6 +33,7 @@ parser.add_argument("--c_qflag", default='q_malo')
 parser.add_argument("--c_calidad", default='q')
 parser.add_argument("--c_afiltrar", required=True)
 parser.add_argument("--logfolder", default='/var/log/FI')
+parser.add_argument("--loglevel", default=1, choices=range(0,4))
 
 #
 logger_obj = Logger()
@@ -45,6 +46,7 @@ parser.add_argument("--workers", type=int, default=cpu_count(),
                     Por defecto es el número de procesadores disponibles.""")
 
 args = parser.parse_args()
+logger.logger.setLevel(args.loglevel)
 
 log_file = '%s/FI-%s-%s.%s.%s.log' % (
     args.logfolder, datetime.now().strftime('%Y%m%d%H%M%S'),
