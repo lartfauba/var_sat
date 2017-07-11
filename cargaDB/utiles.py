@@ -11,7 +11,7 @@ import errno
 def borrarArchivo(archivo):
     try:
         remove(archivo)
-    except OSError, e:  ## if failed, report it back to the user ##
+    except OSError as e:  ## if failed, report it back to the user ##
         print ("Error: %s - %s." % (e.filename,e.strerror))
 
 
