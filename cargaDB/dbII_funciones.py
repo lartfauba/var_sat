@@ -32,19 +32,17 @@ from IPython import embed
 
 from os import walk  # para buscarimagenes
 
-
-
 from utiles import obtenerLogger
-
-
 
 
 args = None
 logger = None
 
+
 def conexionBaseDatos(database, user, password, host):
     """
-    Se conecta a la base de datos y devuelve un cursor que es que se va a usar para operar con la base de datos
+    Se conecta a la base de datos y devuelve un cursor que es que se va a usar
+    para operar con la base de datos
 
     Argumentos
     -------------
@@ -54,7 +52,8 @@ def conexionBaseDatos(database, user, password, host):
     """
 
     try:
-        conn = pg.connect(database=database, user=user, password=password, host=host)
+        conn = pg.connect(database=database,
+                          user=user, password=password, host=host)
     except Exception as e:
         logger.error("%s", e)
         raise e
@@ -70,7 +69,8 @@ def conexionBaseDatos(database, user, password, host):
 
 def listarImagenes(path):
     """
-    Lista archivos de las imagenes que se encuetran en un arbol de directorios indicado y devuelve una lista de las imagenes
+    Lista archivos de las imagenes que se encuetran en un arbol de directorios
+    indicado y devuelve una lista de las imagenes
 
     Argumento
     -----------
@@ -78,14 +78,16 @@ def listarImagenes(path):
 
     Devuelve
     ---------
-    lista_archivos: lista con los path completos a las imagenes del arbol de directorios
+    lista_archivos: lista con los path completos a las imagenes del arbol
+    de directorios
     """
 
     lista_archivos = []
-    ## chequear que sea una imagen sino es lo mismo que usar la otra funcion directamente
+    # chequear que sea una imagen sino es lo mismo que usar la otra funcion
+    # directamente
     for (path, directorios, archivos) in os.walk(path):
         for archivo in archivos:
-            #~ if archivo.split('.')[-1] in ['hdf', 'HDF']:
+            # ~ if archivo.split('.')[-1] in ['hdf', 'HDF']:
             if archivo.split('.')[-1] in ['hdf', 'HDF', 'nc', 'NC']:
                 lista_archivos.append(os.path.join(path, archivo))
     return lista_archivos
@@ -93,7 +95,7 @@ def listarImagenes(path):
 
 def buscarImagenes(ruta, satelite, producto, version, tile):
     imagenes = []
-    extensiones_validas = ['hdf','nc']
+    extensiones_validas = ['hdf', 'nc']
     path = "%s/%s/%s.%s" % (ruta, satelite, producto, version)
     logger.info("Buscando %s en %s" % (tile, path))
     for root, dirs, files in walk(path):
@@ -102,20 +104,24 @@ def buscarImagenes(ruta, satelite, producto, version, tile):
                 logger.debug("%s no concuerda con el tile %s" % (f, tile))
                 continue
             if f.split('.')[-1].lower() not in extensiones_validas:
-                logger.debug("%s no tiene una extensión válida (%s)" % (f, f[-3:]))
+                logger.debug(
+                    "%s no tiene una extensión válida (%s)" % (f, f[-3:]))
                 continue
-            imagen = "%s/%s" % (root, f) # FIXME no es cross-platform
+            imagen = "%s/%s" % (root, f)  # FIXME no es cross-platform
             imagenes.append(imagen)
     logger.info("Encontre %s imagenes" % len(imagenes))
-    return sorted(imagenes, reverse=True) # en reversa para procesar las mas nuevas primero
+    return sorted(imagenes, reverse=True)  # reversa p/procesar +nuevas primero
 
 
 def listarInventario():
     """
     Devuelve una lista de las imagenes que ya estan importadas
     """
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
-    # OJO!!! En multiprocessing no puedo traer la conexion y el cursor como inputs de la funcion listarInventario()
+    conexion, cursor = conexionBaseDatos(args.base,
+                                         args.usuario, args.clave,
+                                         args.servidor)
+    # OJO!!! En multiprocessing no puedo traer la conexion y el cursor como
+    # inputs de la funcion listarInventario()
     #            -> Necesita crear las instancias aqui adentro
     # dvz | Ver -> http://initd.org/psycopg/docs/usage.html#thread-safety
 
@@ -129,48 +135,69 @@ def listarInventario():
     imagenes_inventario = cursor.fetchall()
 
     try:
-        ## si hay imagenes las agrega a la variable
-        imagenes_inventario = np.array(imagenes_inventario)[:,0]
+        # si hay imagenes las agrega a la variable
+        imagenes_inventario = np.array(imagenes_inventario)[:, 0]
     except:
         imagenes_inventario = []
 
-    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" % (len(imagenes_inventario), args.producto, args.tile, args.version))
+    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" %
+                 (len(imagenes_inventario),
+                  args.producto, args.tile, args.version))
     return imagenes_inventario
 
 
 def compruebaInventario():
-    #conexion, cursor = conexionBaseDatos("var_sat_new", "postgres", "postgres", "10.1.18.24")
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
-   
+    # conexion, cursor = conexionBaseDatos("var_sat_new",
+    #                                      "postgres", "postgres", "10.1.18.24")
+    conexion, cursor = conexionBaseDatos(args.base,
+                                         args.usuario, args.clave,
+                                         args.servidor)
+
     cursor.execute("SELECT distinct(tabla_destino) FROM rasters.inventario")
     tablas = [t[0] for t in cursor.fetchall()]
 
-    logger.info("El inventario referencia a imagenes en %d tablas" % len(tablas))
+    logger.info("El inventario referencia a imagenes en %d tablas" %
+                len(tablas))
 
     for t in tablas:
         cursor.execute("SELECT DISTINCT(filename) FROM %s" % t)
-        im_tabla = tuple( [i[0] for i in sorted(cursor.fetchall())] )
+        im_tabla = tuple([i[0] for i in sorted(cursor.fetchall())])
 
-        cursor.execute("SELECT * FROM rasters.inventario WHERE tabla_destino = %s AND imagen NOT IN %s", (t, im_tabla,))
+        cursor.execute("""
+                       SELECT * FROM rasters.inventario
+                       WHERE tabla_destino = %s
+                       AND imagen NOT IN %s""", (t, im_tabla,))
         if cursor.rowcount != 0:
-            logger.error("%s ERROR: Algunas de las imagenes que referencia el inventario no estan en la tabla." % t)
+            logger.error(
+                "%s ERROR: Algunas de las imagenes que referencia el inventario no estan en la tabla." % t)
         else:
-            logger.info("%s %d OK: Todas imagenes que referencia el inventario estan en la tabla." % (t, len(im_tabla)))
+            logger.info(
+                "%s %d OK: Todas imagenes que referencia el inventario estan en la tabla." % (t, len(im_tabla)))
 
+        # Comprobacion inversa: imagenes en el inventario que
+        # no estan en la tabla?
+        cursor.execute(""""
+                       SELECT imagen
+                       FROM rasters.inventario
+                       WHERE tabla_destino = '%s'""" % t)
+        im_inventario = tuple([i[0] for i in sorted(cursor.fetchall())])
 
-        # Comprobacion inversa: imagenes en el inventario que no estan en la tabla?
-        cursor.execute("SELECT imagen FROM rasters.inventario WHERE tabla_destino = '%s'" % t)
-        im_inventario = tuple( [i[0] for i in sorted(cursor.fetchall())] )
-
-        cursor.execute("SELECT * FROM {0} WHERE filename NOT IN %s".format(t), (im_inventario,))
+        cursor.execute("""
+                       SELECT *
+                       FROM {0}
+                       WHERE filename NOT IN %s""".format(t), (im_inventario,))
         if cursor.rowcount != 0:
-            logger.error("%s ERROR: Algunas de las imagenes no estan inventariadas." % t)
+            logger.error(
+                "%s ERROR: Algunas de las imagenes no estan inventariadas." % t)
         else:
-            logger.info("%s %d OK: Todas las imagenes de la tabla estan en el inventario" % (t, len(im_tabla)))
+            logger.info(
+                "%s %d OK: Todas las imagenes de la tabla estan en el inventario" % (t, len(im_tabla)))
 
 
 def limpiaDuplicadas():
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+    conexion, cursor = conexionBaseDatos(args.base,
+                                         args.usuario, args.clave,
+                                         args.servidor)
 
     sql = """
         SELECT
@@ -190,21 +217,22 @@ def limpiaDuplicadas():
     for imagen in duplicadas:
         # busco fecha de procesamiento mas reciente de la imagen
         sql = """
-        SELECT 
+        SELECT
             (SUBSTRING(imagen FROM '(.{{13}}).hdf'))::bigint as procesamiento
         FROM rasters.inventario
         WHERE imagen LIKE '%{0}%{1}%'
         ORDER BY procesamiento DESC
         """.format(imagen[0], imagen[1])
-        
+
         logger.debug(sql)
         cursor.execute(sql)
         mas_reciente = cursor.fetchone()
 
-        logger.warn("%s %s Eliminando procesamientos anteriores a %d" % (imagen[0], imagen[1], mas_reciente[0]))
+        logger.warn(
+            "%s %s Eliminando procesamientos anteriores a %d" % (imagen[0], imagen[1], mas_reciente[0]))
 
         sql = """
-            SELECT 
+            SELECT
                 imagen,
                 tabla_destino
             FROM rasters.inventario
@@ -216,7 +244,7 @@ def limpiaDuplicadas():
         logger.debug(sql)
         cursor.execute(sql)
         deprecadas = cursor.fetchall()
-    
+
         for im in deprecadas:
             sql = """
                 DELETE FROM {1}
@@ -271,9 +299,9 @@ def _chequearInventario(lista_argumentos):
 
             if subdatasets[key] in imagenes_inventario:
                 logger.debug('%s: ya esta cargada en la base de datos' %(subdatasets[key]))
-                continue 
+                continue
 
-               
+
             # TODO: manejar distintas fechas de procesamiento NASA para una misma scena
             if chequearDuplicada(subdatasets[key]):
                 continue
@@ -297,7 +325,7 @@ def chequearDuplicada(imagen):
 
     # Genero una expresion para buscarla en postgres
     wildcard = imagen.replace(proc_imagen, '%')
-    
+
     sql = """
                 SELECT (regexp_matches(imagen, '{0}.(.*).hdf'))[1]::bigint AS procesamiento
                 FROM rasters.inventario
@@ -315,7 +343,7 @@ def chequearDuplicada(imagen):
         if proc_db > int(proc_imagen):
             logger.warn('%s: la base de datos contiene una version mas reciente (%d)' % (imagen, proc_db))
             return 1
-    
+
     return 0
 
 
@@ -341,7 +369,7 @@ def importarImagen(base_path, dataset, tabla, dryrun=None):
 
     # conexion, cursor = conexionDatabase()
     conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
-    
+
     try:
         temporal = NamedTemporaryFile(dir='/tmp')
     except Exception as e:
@@ -427,9 +455,9 @@ def obtenerSubdatasets(nombre_imagen, saltear=False):
 
 def verDatasets(archivo):
     ds = obtenerSubdatasets(archivo)
-    print archivo
+    print(archivo)
     for key, value in ds.iteritems():
-        print "%s\t%s" % (key, value.replace(archivo,''))
+        print("%s\t%s" % (key, value.replace(archivo,'')))
 
 
 def executeUpdates(tablas,srid):
@@ -519,10 +547,10 @@ def chequearTablas(tablas):
 
     for t in tablas:
         esquema, tabla = t.split('.')
-        
+
         cursor.execute("""
                         SELECT exists(
-                            SELECT * 
+                            SELECT *
                             FROM information_schema.tables
                             WHERE table_schema=%s AND table_name=%s)""", (esquema, tabla,))
 
