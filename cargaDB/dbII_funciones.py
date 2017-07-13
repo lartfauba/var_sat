@@ -365,6 +365,7 @@ def importarImagen(base_path, dataset, tabla, dryrun=None):
     if dryrun is None:
         dryrun = args.dryrun
 
+    # TODO: CHEQUEAR QUE EXISTA!
     raster2pgsql = "/usr/bin/raster2pgsql"
 
     # conexion, cursor = conexionDatabase()
@@ -377,6 +378,9 @@ def importarImagen(base_path, dataset, tabla, dryrun=None):
         return 0
 
     try:
+
+        # el raster2pgsql dejó de soportar datasets...
+        # http://dustymugs.blogspot.com.ar/2012/04/importing-modis-datasets-into-postgis.html
         comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, dataset, tabla]
         p = Popen(comando,cwd=base_path,stdout=temporal)
         p.wait()
