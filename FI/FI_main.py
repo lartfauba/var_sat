@@ -48,7 +48,7 @@ parser.add_argument("--workers", type=int, default=cpu_count(),
 args = parser.parse_args()
 
 logger.info(args)  # Debug ARGV
-logger.logger.setLevel(args.loglevel)
+logger.setLevel(args.loglevel)
 
 log_file = '%s/FI-%s-%s.%s.%s.log' % (
     args.logfolder, datetime.now().strftime('%Y%m%d%H%M%S'),
