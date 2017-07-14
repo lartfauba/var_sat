@@ -46,6 +46,8 @@ parser.add_argument("--workers", type=int, default=cpu_count(),
                     Por defecto es el número de procesadores disponibles.""")
 
 args = parser.parse_args()
+
+logger.info(args)  # Debug ARGV
 logger.logger.setLevel(args.loglevel)
 
 log_file = '%s/FI-%s-%s.%s.%s.log' % (
