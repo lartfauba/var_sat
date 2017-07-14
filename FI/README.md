@@ -136,3 +136,5 @@ https://stackoverflow.com/questions/512451/how-can-i-add-a-column-to-a-postgresq
 - [ ] Agregar parametro para el nivel de logging
 - [x] Guardar un log de las corridas y tu walltime (Estadisticas de ejecuciones)
 - [ ] Usar un threading.manager para monitorear el progreso
+- [ ] Agregar funcionalidad singleton
+- [ ] Armar scripts para daemonizarlo: una tabla con FI pendientes/estado y el script como worker
