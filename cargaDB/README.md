@@ -15,14 +15,10 @@
 Si bien vamos a instalar las librerias de python mediante PIP, necesitamos asegurarnos antes de tener en el sistema ciertas aplicaciones/liberías.
 
 ```bash
-sudo apt-get install python-dev python-pip # Lo básico para compilar librerias de python 
-sudo apt-get install libpq-dev # Para compilar psycopg2
+sudo apt-get install python-dev python-pip  # Lo básico para compilar librerias de python 
+sudo apt-get install libpq-dev  # Para compilar psycopg2
+sudo apt-get install libgdal20 libgdal-dev  # Para compilar gdal
 ```
-
-#### GDAL 2
-
-A principios del 2016 salió la primera versión estable de la librería GDAL 2. Lamentablemente todavía no está en los repositorios de debian/ubuntu así que hay que compilarla a mano
-Armé un script que lo hace: setup-libgdal2.sh. No hace falta correrlo como root pero en un momento utiliza sudo.
 
 #### Virtual Environment
 
@@ -36,7 +32,7 @@ sudo pip install virtualenv
 
 ```bash
 mkdir ~/venvs  # Creo un directorio donde guardar los environments
-virtualenv ~/venvs/var_sat  # Creamos el environment virtual particular para esto
+virtualenv ~/venvs/var_sat --python=$(which python3) # Creamos el environment virtual particular para esto
 source ~/venvs/var_sat/bin/activate  # Entramos al environment
 pip install gdal psycopg2 numpy ipython  # Instalamos las librerias necesarias 
 ```
