@@ -40,6 +40,8 @@ parser.add_argument("--version", default="005",
 parser.add_argument("--tile", required=True)  # TODO: Soportar listas, o si no se especifica, cargar todos los tiles que se encuentren
 parser.add_argument("--subdatasets", required=True, type=json.loads,
 			help='Array de JSON donde cada key es un dataset y su valor la tabla destino')
+                    # TODO: Armar la tabla destino a partir de los otros parametros:
+                    #           esquema.producto_dataset
 parser.add_argument("--srid", default="96842",
 			help='SRID de las imágenes.')
 # TODO: No se puede detectar la proyeccion de la imagen? Seguro que si
