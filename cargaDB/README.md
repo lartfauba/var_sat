@@ -2,11 +2,12 @@
 
 ## TODO
 
-* Permitir la carga por tile, tiles o todos.
-* Consultar las imagenes del inventario una sola vez (después de cada actualización)
 * Permitir cargar varios tiles a la vez
-* Detectar automáticamente la proyección de las imagenes
+* Simplificar la selección de datasets utilizando un formato predeterminado en el nombre de la tabla destino (ie: modis006.mod13q1_ndvi).
+* Consultar las imagenes del inventario una sola vez (después de cada actualización)
+* Limpiar las tablas (vacuum&reindex) después de una modificación (ie: eliminación de duplicadas)
 * Desarrollar cuan especifica tiene que ser la ruta a las imagenes
+* Detectar automáticamente la proyección de las imagenes
 
 ## Instalación
 
