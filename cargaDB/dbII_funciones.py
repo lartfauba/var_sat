@@ -146,7 +146,7 @@ def listarInventario():
 
         try:
             # si hay imagenes las agrega a la variable
-            imagenes_fetch = np.array(imagenes_fetch)[:, 0])
+            imagenes_fetch = np.array(imagenes_fetch)[:, 0]
         except Exception as e:
             logger.error("Error: %s", e)
             continue
