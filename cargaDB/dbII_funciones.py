@@ -321,7 +321,7 @@ def _chequearInventario(lista_argumentos):
             else:
                 logger.error('%s: no se cargo' %(subdatasets[key]))
     except Exception as e:
-        logger.error("Error: %s", e)
+        logger.error("Error: %s (%s)", e, imagen)
 
     return
 
