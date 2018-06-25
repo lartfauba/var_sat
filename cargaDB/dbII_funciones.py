@@ -343,8 +343,11 @@ def chequearDuplicada(imagen):
     """.format(ARGS.version, wildcard)
     logger.debug(sql)
 
-    conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
-    cursor.execute(sql.format(ARGS.version, wildcard))
+    try:
+        conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
+        cursor.execute(sql.format(ARGS.version, wildcard))
+    except Exception as e:
+        logger.error("Error: %s (%s)", e, imagen)
 
     if cursor.rowcount != 0:
         proc_db = cursor.fetchone()[0]
