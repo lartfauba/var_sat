@@ -325,7 +325,7 @@ def _chequearInventario(lista_argumentos):
 
 def chequearDuplicada(imagen):
     # Extraigo la fecha de procesamiento de la imagen
-    busqueda = re.search('{0}.(.*).hdf'.format(ARGS.version), imagen)
+    busqueda = re.search('.{0}.(.*).hdf'.format(ARGS.version), imagen)
     proc_imagen = busqueda.group(1)  # La dejo como STR, la convierto más tarde
 
     # Genero una expresion para buscarla en postgres
