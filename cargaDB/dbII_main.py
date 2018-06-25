@@ -35,7 +35,7 @@ parser.add_argument("--ruta", default="/modis",
 			help='Ruta al directorio donde estan las imágenes a cargar.')
 parser.add_argument("--satelite", required=True)
 parser.add_argument("--producto", required=True)
-parser.add_argument("--version", default="005",
+parser.add_argument("--version", default="006",
 			help='Versión de las imágenes.')
 parser.add_argument("--tile", required=True)  # TODO: Soportar listas, o si no se especifica, cargar todos los tiles que se encuentren
 parser.add_argument("--subdatasets", required=True, type=json.loads,
