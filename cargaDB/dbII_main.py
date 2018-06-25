@@ -61,7 +61,7 @@ PARSER.add_argument("--dryrun", default=False, action='store_true',
 ARGS = PARSER.parse_args()
 
 # TODO: Debe haber un modo mas elegante de hacerlo...
-dbII_funciones.args = ARGS
+dbII_funciones.ARGS = ARGS
 dbII_funciones.logger = obtenerLogger(ARGS.logfile)
 
 ## listar imagenes
