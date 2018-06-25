@@ -2,8 +2,7 @@
 
 ## TODO
 
-* Permitir especificar un rango temporal (ie: cargar las imagenes del 2006)
-* Permitir cargar varios tiles a la vez
+* Separar las funciones de los archivos MODIS/HDF en una libreria aparte
 * Simplificar la selección de datasets utilizando un formato predeterminado en el nombre de la tabla destino (ie: modis006.mod13q1_ndvi).
 * Consultar las imagenes del inventario una sola vez (después de cada actualización)
 * Limpiar las tablas (vacuum&reindex) después de una modificación (ie: eliminación de duplicadas)

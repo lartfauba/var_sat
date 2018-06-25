@@ -32,7 +32,7 @@ from IPython import embed
 
 from os import walk  # para buscarimagenes
 
-from utiles import obtenerLogger, modis_fn2date
+from utiles import obtenerLogger, modis_fn2date, modis_fn2tile
 
 
 ARGS = None
@@ -103,8 +103,8 @@ def buscarImagenes(ruta, satelite, producto, version, tile):
             if ".%s." % version not in f:  # Verifico
                 logger.debug("%s no concuerda con la version %s" % (f, version))
                 continue
-            if tile not in f:
-                logger.debug("%s no concuerda con el tile %s" % (f, tile))
+            if modis_fn2tile(f) not in tile:
+                logger.debug("%s no concuerda con el tile [%s]" % (f, tile))
                 continue
             if f.split('.')[-1].lower() not in extensiones_validas:
                 logger.debug(

@@ -35,9 +35,7 @@ PARSER.add_argument("--ruta", default="/modis",
                     help='Ruta al directorio donde estan las imágenes a cargar.')
 PARSER.add_argument("--satelite", required=True)
 PARSER.add_argument("--producto", required=True)
-
-# TODO: Soportar listas, o si no se especifica, cargar todos los tiles que se encuentren
-PARSER.add_argument("--tile", required=True)
+PARSER.add_argument("--tile", required=True, nargs='+')
 
 # TODO: Armar la tabla destino a partir de los otros parametros: esquema.producto_dataset
 PARSER.add_argument("--subdatasets", required=True, type=json.loads,

@@ -12,6 +12,13 @@ from datetime import datetime
 def modis_fn2date(filename):
     return datetime.strptime(filename.split('/')[-1].split('.')[1], "A%Y%j")
 
+def modis_fn2tile(filename):
+    return filename.split('.')[2]
+
+def modis_fn2proc(filename):
+    # Extraigo la fecha de procesamiento de la imagen
+    busqueda = re.search('\.(.*)\.hdf', imagen)
+    return busqueda.group(1)  # La dejo como STR, la convierto más tarde
 
 def borrarArchivo(archivo):
     try:
