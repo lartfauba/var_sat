@@ -32,7 +32,7 @@ from IPython import embed
 
 from os import walk  # para buscarimagenes
 
-from utiles import obtenerLogger
+from utiles import obtenerLogger, modis_fn2date
 
 
 ARGS = None
