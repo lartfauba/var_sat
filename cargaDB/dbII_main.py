@@ -11,9 +11,7 @@
 ########################################################################
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from datetime import datetime
 # from textwrap import dedent
-from sys import  exit
 import json
 
 from multiprocessing import cpu_count
@@ -76,13 +74,6 @@ imagenes = dbII_funciones.buscarImagenes(ARGS.ruta, ARGS.satelite,
 
 # Me quedo sólo con las que estan en fecha
 # MOD13A2.A2012161.h12v12.006.2015247050651.hdf
-
-#if ARGS.start_date or ARGS.end_date:
-#    for i in imagenes:
-#        fecha = datetime.strptime(i.split('/')[-1].split('.')[1] , "A%Y%j")
-#        print(i, fecha)
-#exit()
-
 #print dbII_funciones.listarInventario()
 #print lista_imagenes
 

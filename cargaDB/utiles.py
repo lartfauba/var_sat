@@ -6,6 +6,11 @@ from logging import INFO, DEBUG, ERROR, WARN
 from os import makedirs, remove, getuid
 from pwd import getpwuid
 import errno
+from datetime import datetime
+
+
+def modis_fn2date(filename):
+    return datetime.strptime(filename.split('/')[-1].split('.')[1], "A%Y%j")
 
 
 def borrarArchivo(archivo):

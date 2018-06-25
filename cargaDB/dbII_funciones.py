@@ -35,7 +35,7 @@ from os import walk  # para buscarimagenes
 from utiles import obtenerLogger
 
 
-args = None
+ARGS = None
 logger = None
 
 
@@ -109,6 +109,11 @@ def buscarImagenes(ruta, satelite, producto, version, tile):
                 continue
             imagen = "%s/%s" % (root, f)  # FIXME no es cross-platform
             imagenes.append(imagen)
+
+    if ARGS.start_date:
+        imagenes = [ i for i in imagenes if modis_fn2date(i) >= ARGS.start_date ]
+    if ARGS.end_date:
+        imagenes = [ i for i in imagenes if modis_fn2date(i) <= ARGS.end_date ]
     logger.info("Encontre %s imagenes" % len(imagenes))
     return sorted(imagenes, reverse=True)  # reversa p/procesar +nuevas primero
 
@@ -117,9 +122,9 @@ def listarInventario():
     """
     Devuelve una lista de las imagenes que ya estan importadas
     """
-    conexion, cursor = conexionBaseDatos(args.base,
-                                         args.usuario, args.clave,
-                                         args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base,
+                                         ARGS.usuario, ARGS.clave,
+                                         ARGS.servidor)
     # OJO!!! En multiprocessing no puedo traer la conexion y el cursor como
     # inputs de la funcion listarInventario()
     #            -> Necesita crear las instancias aqui adentro
@@ -130,7 +135,7 @@ def listarInventario():
         WHERE imagen like '%{0}%'
         AND imagen like '%{1}%'
         AND imagen like '%.{2}.%'
-    """.format(args.producto, args.tile, args.version)
+    """.format(ARGS.producto, ARGS.tile, ARGS.version)
     cursor.execute(sql)
     imagenes_inventario = cursor.fetchall()
 
@@ -142,16 +147,16 @@ def listarInventario():
 
     logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" %
                  (len(imagenes_inventario),
-                  args.producto, args.tile, args.version))
+                  ARGS.producto, ARGS.tile, ARGS.version))
     return imagenes_inventario
 
 
 def compruebaInventario():
     # conexion, cursor = conexionBaseDatos("var_sat_new",
     #                                      "postgres", "postgres", "10.1.18.24")
-    conexion, cursor = conexionBaseDatos(args.base,
-                                         args.usuario, args.clave,
-                                         args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base,
+                                         ARGS.usuario, ARGS.clave,
+                                         ARGS.servidor)
 
     cursor.execute("SELECT distinct(tabla_destino) FROM rasters.inventario")
     tablas = [t[0] for t in cursor.fetchall()]
@@ -195,9 +200,9 @@ def compruebaInventario():
 
 
 def limpiaDuplicadas():
-    conexion, cursor = conexionBaseDatos(args.base,
-                                         args.usuario, args.clave,
-                                         args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base,
+                                         ARGS.usuario, ARGS.clave,
+                                         ARGS.servidor)
 
     sql = """
         SELECT
@@ -205,7 +210,7 @@ def limpiaDuplicadas():
             SUBSTRING(imagen FROM '(MODIS.*)') as dataset
         FROM rasters.inventario
         WHERE imagen LIKE '%MODIS%'
-        AND imagen LIKE '%.""" + args.version + """.%'
+        AND imagen LIKE '%.""" + ARGS.version + """.%'
         GROUP BY pdtv, dataset
         HAVING count(*) > 1"""
 
@@ -320,7 +325,7 @@ def _chequearInventario(lista_argumentos):
 
 def chequearDuplicada(imagen):
     # Extraigo la fecha de procesamiento de la imagen
-    busqueda = re.search('{0}.(.*).hdf'.format(args.version), imagen)
+    busqueda = re.search('{0}.(.*).hdf'.format(ARGS.version), imagen)
     proc_imagen = busqueda.group(1)  # La dejo como STR, la convierto más tarde
 
     # Genero una expresion para buscarla en postgres
@@ -332,11 +337,11 @@ def chequearDuplicada(imagen):
                 WHERE imagen like '{1}'
                 ORDER BY procesamiento DESC
                 LIMIT 1
-    """.format(args.version, wildcard)
+    """.format(ARGS.version, wildcard)
     logger.debug(sql)
 
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
-    cursor.execute(sql.format(args.version, wildcard))
+    conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
+    cursor.execute(sql.format(ARGS.version, wildcard))
 
     if cursor.rowcount != 0:
         proc_db = cursor.fetchone()[0]
@@ -363,13 +368,13 @@ def importarImagen(base_path, dataset, tabla, dryrun=None):
         1 = Ok
     """
     if dryrun is None:
-        dryrun = args.dryrun
+        dryrun = ARGS.dryrun
 
     # TODO: CHEQUEAR QUE EXISTA!
     raster2pgsql = "/usr/bin/raster2pgsql"
 
     # conexion, cursor = conexionDatabase()
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
 
     try:
         temporal = NamedTemporaryFile(dir='/tmp')
@@ -381,7 +386,7 @@ def importarImagen(base_path, dataset, tabla, dryrun=None):
 
         # el raster2pgsql dejó de soportar datasets...
         # http://dustymugs.blogspot.com.ar/2012/04/importing-modis-datasets-into-postgis.html
-        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', args.srid, dataset, tabla]
+        comando = [raster2pgsql,'-a','-F','-t','100x100','-s', ARGS.srid, dataset, tabla]
         p = Popen(comando,cwd=base_path,stdout=temporal)
         p.wait()
     except Exception as e:
@@ -476,7 +481,7 @@ def executeUpdates(tablas,srid):
     None
     """
     # TODO deducir el srid mediante postgres
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
 
     sql_geom = """
     UPDATE {0}
@@ -547,7 +552,7 @@ def chequearInventario(imagenes, subdatasets, workers=1):
 
 def chequearTablas(tablas):
 
-    conexion, cursor = conexionBaseDatos(args.base, args.usuario, args.clave, args.servidor)
+    conexion, cursor = conexionBaseDatos(ARGS.base, ARGS.usuario, ARGS.clave, ARGS.servidor)
 
     for t in tablas:
         esquema, tabla = t.split('.')
@@ -567,6 +572,6 @@ def chequearTablas(tablas):
                       the_geom geometry(Geometry,{2}),
                       fecha date,
                       CONSTRAINT {1}_pkey PRIMARY KEY (rid)
-                ) WITH ( OIDS=FALSE )""".format(esquema, tabla, args.srid)
+                ) WITH ( OIDS=FALSE )""".format(esquema, tabla, ARGS.srid)
             cursor.execute(sql)
             conexion.commit()
