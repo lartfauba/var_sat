@@ -146,13 +146,14 @@ def listarInventario():
 
         try:
             # si hay imagenes las agrega a la variable
-            imagenes_inventario.extend(np.array(imagenes_fetch)[:, 0])
+            imagenes_fetch = np.array(imagenes_fetch)[:, 0])
         except Exception as e:
             logger.error("Error: %s", e)
             continue
 
+        imagenes_inventario.extend(imagenes_fetch)
         logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" %
-                     (len(imagenes_inventario), ARGS.producto, t, ARGS.version))
+                     (len(imagenes_fetch), ARGS.producto, t, ARGS.version))
 
     return imagenes_inventario
 
