@@ -100,6 +100,9 @@ def buscarImagenes(ruta, satelite, producto, version, tile):
     logger.info("Buscando %s en %s" % (tile, path))
     for root, dirs, files in walk(path):
         for f in files:
+            if ".%s." % version not in f:  # Verifico
+                logger.debug("%s no concuerda con la version %s" % (f, version))
+                continue
             if tile not in f:
                 logger.debug("%s no concuerda con el tile %s" % (f, tile))
                 continue
