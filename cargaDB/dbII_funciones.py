@@ -93,18 +93,18 @@ def listarImagenes(path):
     return lista_archivos
 
 
-def buscarImagenes(ruta, satelite, producto, version, tile):
+def buscarImagenes(ruta, satelite, producto, version, tiles):
     imagenes = []
     extensiones_validas = ['hdf', 'nc']
     path = "%s/%s/%s.%s" % (ruta, satelite, producto, version)
-    logger.info("Buscando %s en %s" % (tile, path))
+    logger.info("Buscando %s en %s" % (tiles, path))
     for root, dirs, files in walk(path):
         for f in files:
             if ".%s." % version not in f:  # Verifico
                 logger.debug("%s no concuerda con la version %s" % (f, version))
                 continue
-            if modis_fn2tile(f) not in tile:
-                logger.debug("%s no concuerda con el tile [%s]" % (f, tile))
+            if modis_fn2tile(f) not in tiles:
+                logger.debug("%s no concuerda con el los tiles %s" % (f, tiles))
                 continue
             if f.split('.')[-1].lower() not in extensiones_validas:
                 logger.debug(
@@ -133,25 +133,29 @@ def listarInventario():
     #            -> Necesita crear las instancias aqui adentro
     # dvz | Ver -> http://initd.org/psycopg/docs/usage.html#thread-safety
 
-    sql = """
-        SELECT imagen FROM rasters.inventario
-        WHERE imagen like '%{0}%'
-        AND imagen like '%{1}%'
-        AND imagen like '%.{2}.%'
-    """.format(ARGS.producto, ARGS.tile, ARGS.version)
-    cursor.execute(sql)
-    imagenes_inventario = cursor.fetchall()
+    imagenes_inventario = []
+    for t in ARGS.tile:
+        sql = """
+            SELECT imagen FROM rasters.inventario
+            WHERE imagen like '%{0}%'
+            AND imagen like '%{1}%'
+            AND imagen like '%.{2}.%'
+        """.format(ARGS.producto, t, ARGS.version)
+        cursor.execute(sql)
+        imagenes_fetch = cursor.fetchall()
 
-    try:
-        # si hay imagenes las agrega a la variable
-        imagenes_inventario = np.array(imagenes_inventario)[:, 0]
-    except:
-        imagenes_inventario = []
+        try:
+            # si hay imagenes las agrega a la variable
+            imagenes_inventario.extend(np.array(imagenes_fetch)[:, 0])
+        except Exception as e:
+            logger.error("Error: %s", e)
+            continue
 
-    logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" %
-                 (len(imagenes_inventario),
-                  ARGS.producto, ARGS.tile, ARGS.version))
+        logger.debug("Encontre %d imagenes de %s %s %s cargadas en la base" %
+                     (len(imagenes_inventario), ARGS.producto, t, ARGS.version))
+
     return imagenes_inventario
+
 
 
 def compruebaInventario():

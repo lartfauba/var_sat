@@ -2,6 +2,7 @@
 
 ## TODO
 
+* Implementar un inventario con mas campos, como fecha de carga
 * Separar las funciones de los archivos MODIS/HDF en una libreria aparte
 * Simplificar la selección de datasets utilizando un formato predeterminado en el nombre de la tabla destino (ie: modis006.mod13q1_ndvi).
 * Consultar las imagenes del inventario una sola vez (después de cada actualización)
