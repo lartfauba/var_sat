@@ -138,7 +138,7 @@ def listarInventario():
         sql = """
             SELECT imagen FROM rasters.inventario
             WHERE imagen like '%{0}%'
-            AND imagen like '%{1}%'
+            AND imagen like '%.{1}.%'
             AND imagen like '%.{2}.%'
         """.format(ARGS.producto, t, ARGS.version)
         cursor.execute(sql)
